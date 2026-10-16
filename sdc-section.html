@@ -1,0 +1,1608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SwiNOG #42 – The Cloud-Native Advantage</title>
+
+<!-- reveal.js 5.2.1, stored locally in ./reveal (works offline) -->
+<link rel="stylesheet" href="reveal/reset.css">
+<link rel="stylesheet" href="reveal/reveal.css">
+<link rel="stylesheet" href="reveal/theme/white.css">
+
+<style>
+  /* ---- Type scale (canvas 1280x720) --------------------------------------------------
+     body 34px · .small 25px · code blocks 21-24px · secondary labels >= 19px (.56em).
+     Nothing on a slide should be smaller than ~19px; if it does not fit, cut text or split the slide. */
+  :root { --blue:#1a56db; --green:#1a8a3a; --red:#c0392b; --grey:#475569; --font-ui: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; --font-mono: Consolas, 'Cascadia Mono', 'SF Mono', Menlo, monospace; }
+  .reveal { font-family: var(--font-ui); font-size: 34px; }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: inherit; text-transform: none; color: var(--blue); letter-spacing: 0; }
+  .reveal h2 { font-size: 1.3em; line-height: 1.15; margin: 0 0 .5em; }
+  .reveal section { text-align: left; }
+  /* slides start below the fixed header band and are top-aligned (see Reveal config: center:false) */
+  .reveal .slides > section { box-sizing: border-box; padding-top: 92px; }
+  .reveal pre { width: 100%; box-shadow: none; font-size: .66em; }
+  .reveal pre code { max-height: none; padding: .7em 1em; background: #f6f8fa; border-radius: 8px; }
+  .reveal code { font-family: var(--font-mono); }
+  .reveal ul, .reveal ol { margin-left: 1em; }
+  .small { font-size: .74em; }
+  .tiny  { font-size: .58em; color: var(--grey); }
+  .small .tiny, .small small, .reveal table .tiny { font-size: .8em; }   /* nested: keep >= 20px */
+  .center { text-align: center; }
+  .good { color: var(--green); font-weight: 700; }
+  .bad  { color: var(--red); font-weight: 700; }
+  .hl   { background: #fff3b0; padding: 0 .2em; border-radius: 4px; }
+  .ha, .hb, .hc, .hd, .he { padding: 0 .15em; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .reveal pre.blame .hl { padding: 0; }  /* keep monospace columns aligned */
+  /* code highlights that switch on together with their description (fragment) */
+  .reveal .hl-fr.fragment.custom { opacity: 1; visibility: visible; }
+  .reveal .hl-fr.fragment.custom:not(.visible) { background: transparent; }
+  .ha { background: #ffe9a8; } .hb { background: #cdeedb; } .hc { background: #d6e4ff; } .hd { background: #f9d6e6; } .he { background: #ddd6fe; }
+  /* two worlds + bridge */
+  .worlds { display:flex; align-items:center; justify-content:center; gap:0; margin-top:.8em; }
+  .world { border:3px solid var(--blue); border-radius:18px; padding:.6em .9em; width:34%; background:#f4f7ff; text-align:center; }
+  .world .wtitle { font-size:.6em; text-transform:uppercase; letter-spacing:.08em; color:var(--blue); font-weight:700; margin-bottom:.4em; }
+  .world .card { background:#fff; border:2px solid #c9d6f5; border-radius:10px; padding:.35em .6em; margin:.35em 0; font-weight:700; font-size:.9em; }
+  .world .card small { display:block; font-weight:400; font-size:.62em; color:var(--grey); }
+  .bridge { display:flex; flex-direction:column; align-items:center; width:32%; }
+  .bridge .sdc { background:var(--blue); color:#fff; font-weight:700; font-size:1.5em; border-radius:50px; padding:.15em 1.1em; margin:.15em 0; box-shadow:0 4px 14px rgba(26,86,219,.35); }
+  .reveal .bridge img.sdc-logo { height: 3.6em; width: auto; max-height: none; margin: .25em 0; border: 0; box-shadow: none; background: none; }
+  .bridge { position:relative; }
+  .bridge .line { position:relative; font-size:.6em; color:var(--grey); width:100%; text-align:center; padding:.35em 0; }
+  .bridge .line.top { border-top:4px solid var(--blue); }
+  .bridge .line.bottom { border-bottom:4px solid var(--blue); }
+  .bridge .line::before, .bridge .line::after { content:""; position:absolute; width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; }
+  .bridge .line::before { left:-3px; border-right:14px solid var(--blue); }
+  .bridge .line::after { right:-3px; border-left:14px solid var(--blue); }
+  .bridge .line.top::before, .bridge .line.top::after { top:-11px; }
+  .bridge .line.bottom::before, .bridge .line.bottom::after { bottom:-11px; }
+
+  /* tables */
+  .reveal table { font-size: .7em; margin: 0 auto; }
+  /* plain header: theme default (no background, no colours) */
+  /* The theme removes the line under the LAST row; keep it, so the table never seems to end early. */
+  .reveal table tbody tr:last-child td { border-bottom: 1px solid; }  /* same style as the other rows (text colour) */
+  /* Step-by-step table rows: tables keep the original theme look (thin line under each row).
+     Not-yet-shown rows stay as faint "ghost" rows (only a light line, text invisible), so the
+     final size is predictable but the slide stays calm. Stronger/weaker ghost: border-bottom-color below. */
+  .reveal table tr.fragment { opacity: 1 !important; visibility: visible !important; }
+  .reveal table tr.fragment:not(.visible) td { color: transparent !important; border-bottom: 1px solid #e4e4e4 !important; }
+  .reveal table tr.fragment:not(.visible) td * { color: transparent !important; background: transparent !important; border-color: transparent !important; }
+  .reveal table td, .reveal table th { padding: .35em .6em; vertical-align: top; }
+
+  /* layouts */
+  .cols { display:flex; gap:1.2em; align-items:flex-start; }
+  .cols > div { flex:1; }
+  .step { display:inline-block; background:var(--blue); color:#fff; border-radius:50%; width:1.35em; height:1.35em; line-height:1.35em; text-align:center; font-size:.8em; margin-right:.4em; }
+  ol.steps { list-style:none; padding:0; margin:0; font-size:.78em; }
+  ol.steps li { margin:.5em 0; line-height:1.25; }
+
+  ol.steps.tk { font-size: 1.05em; }
+  ol.steps.tk li { margin: 1.1em 0; padding-left: 0; }
+  .tk .step { font-size: .9em; }
+  .tk .sub { display: block; margin: .15em 0 0 2.4em; font-size: .68em; font-weight: 400; color: var(--grey); }
+  .reveal a { color: var(--blue); }
+  .in  { color: var(--blue); font-weight:700; }
+  .out { color: var(--green); font-weight:700; }
+  svg text { font-family: var(--font-ui); }
+  .arch-svg { display: block; width: 100%; max-height: 520px; }
+  .refine-svg { display: block; margin: 0 auto; width: 100%; max-height: 520px; }
+
+  /* "what you write -> what SDC derives" (resources slide) */
+  .rs-head, .rs-row { display: grid; grid-template-columns: 1fr 70px 0.62fr; align-items: center; column-gap: .3em; }
+  .rs-head { font-size: .62em; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: .3em; }
+  .rs-flow { display: grid; grid-template-columns: 1.3fr 96px .6fr 96px .8fr; grid-template-rows: auto auto; row-gap: .9em; column-gap: .2em; align-items: center; margin-top: .4em; }
+  .rs-target { align-self: center; text-align: center; }
+  .rs-target .chips { justify-content: center; }
+  .rs-steps { display: flex; flex-direction: column; gap: .8em; margin-top: .6em; }
+  .rs-steps .chip { font-size: .7em; }
+  .rs-step { display: flex; align-items: center; gap: .7em; }
+  .rs-n { flex: none; width: 1.5em; height: 1.5em; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: .95em; color: #fff; }
+  .rs-n.in { background: var(--blue); } .rs-n.out { background: #1f8a4c; }
+  .rs-body { flex: 1; }
+  .rs-txt { font-size: .95em; margin-bottom: .15em; }
+  .rs-txt .rs-api { margin-left: .5em; font-size: .7em; }
+  .rs-head .in { grid-column: 1; } .rs-head .out { grid-column: 3; }
+  .rs-row { margin: .5em 0; }
+  .rs-row .chip { font-size: .68em; }
+  .rs-in, .rs-out { border-radius: 16px; padding: .45em .7em .55em; }
+  .rs-in  { background: #f4f7ff; border: 2px solid #c9d6f5; }
+  .rs-out { background: #effaf3; border: 2px solid #a9dcbc; }
+  .rs-api { font-family: var(--font-mono); font-size: .6em; color: var(--grey); margin-bottom: .2em; }
+  .rs-arrow { text-align: center; font-size: 1.5em; font-weight: 700; color: var(--blue); line-height: 1; }
+  .rs-arrow small { display: block; font-size: .42em; font-weight: 700; letter-spacing: .06em; margin-top: .1em; }
+  .chip.out { background: #fff; border-color: #8fd0a8; color: #14532d; }
+  .chip.in  { background: #fff; border-color: #b7c9f3; color: #1e3a8a; }
+  .chip.sm  { font-size: .58em; }
+  .rs-note { font-size: .62em; color: var(--grey); margin: .25em 0 0; }
+
+  /* deviation reasons */
+  .reveal .dv-link { font-size: .62em; color: var(--grey); margin: .2em 0 0; }
+  .dv-line { border-radius: 6px; padding: .1em .4em; margin-left: -.4em; transition: background .3s, color .3s; }
+  .dv-line.fragment.custom { opacity: 1; visibility: visible; }
+  .dv-line.fragment.custom.visible { background: #fde3cc; color: #9a3f0a; font-weight: 700; }
+  .reveal table.dv-table { width: auto; margin: .5em auto 0; }
+  .reveal .dv-table td { vertical-align: middle; font-size: 1em; padding: .35em .5em; }
+  .reveal .dv-table th { font-size: .8em; padding: .2em .5em; }
+  .reveal .dv-table td, .reveal .dv-table th { padding-right: 1.2em; }
+  .reveal .dv-table td:nth-child(2) { white-space: nowrap; }
+  .dv-table tr.na { --bg: #fff1e6; --fg: #9a3f0a; --bd: #e0894a; }
+  .dv-table tr.ov { --bg: #e8efff; --fg: #1e3a8a; --bd: #5b8def; }
+  .dv-table tr.un { --bg: #f1ecff; --fg: #4c1d95; --bd: #9b7ee0; }
+  .dv-badge { display: inline-block; font-family: var(--font-mono); font-weight: 700; font-size: .85em; letter-spacing: .03em; padding: .15em .8em; border-radius: 999px; background: var(--bg); color: var(--fg); border: 2px solid var(--bd); }
+  .dv-act { display: inline-block; font-size: .85em; font-weight: 700; padding: .1em .7em; border-radius: 8px; background: #f1f5f9; color: #475569; }
+  .dv-act.fix { background: #d5f3e4; color: #047857; }
+  .dv-sub { display: block; font-size: .7em; color: var(--grey); margin-top: .2em; }
+
+  /* QR badge (try-it slide) */
+  .qr-badge { display: inline-block; width: 300px; padding: 18px 18px 14px; border-radius: 32px; background: linear-gradient(160deg, #2f6df0 0%, #1a56db 55%, #123f9e 100%); box-shadow: 0 10px 28px rgba(26,86,219,.28); text-align: center; }
+  .reveal .qr-badge img { max-width: 100%; max-height: none; display: block; width: 100%; height: auto; margin: 0; padding: 14px; box-sizing: border-box; background: #fff; border: 0; border-radius: 20px; box-shadow: none; }
+  .qr-badge .qr-label { margin-top: 10px; color: #fff; font-weight: 700; font-size: .95em; letter-spacing: .14em; text-transform: uppercase; }
+
+  /* priority stack (several teams, one device) */
+  .pz { max-width: 860px; margin: .2em auto 0; }
+  .pz-lane { padding: 0; }
+  .pz-lh { font-weight: 700; font-size: .72em; margin-bottom: .4em; }
+  .pz-lh small { display: block; font-weight: 400; color: var(--grey); font-size: .85em; }
+  .pz-row { display: flex; flex-direction: column; gap: .4em; }
+  .pz-card.flat { grid-template-columns: 1fr; row-gap: .1em; }
+  .pz-res { margin-top: .6em; border: 3px solid var(--blue); border-radius: 14px; background: #f4f7ff; padding: .3em .5em; text-align: center; font-size: .66em; }
+  .pz-res .k { font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--blue); margin-right: .6em; font-size: .85em; }
+  .pz-res .v { display: inline-grid; justify-items: center; font-family: var(--font-mono); font-weight: 700; }
+  .pz-res .v > span { grid-area: 1 / 1; }
+  .pz-res .v .new { color: #fff; background: var(--blue); border-radius: 8px; padding: 0 .3em; }
+  .pz-stack { display: flex; flex-direction: column; gap: .4em; }
+  .pz-card { display: grid; grid-template-columns: 200px 1fr auto; align-items: center; column-gap: .5em; border: 2px solid #c9d6f5; border-left-width: 8px; border-radius: 12px; background: #fff; padding: .4em .7em; }
+  .pz-card.p50 { border-left-color: #1a56db; background: #eef3ff; }
+  .pz-card.p90 { border-left-color: #7c9be8; margin-left: .5em; }
+  .pz-card.p100 { border-left-color: #b8c7ee; margin-left: 1em; }
+  .pz-name { font-family: var(--font-mono); font-weight: 700; font-size: .66em; }
+  .pz-who { display: block; font-size: .9em; font-weight: 400; color: var(--grey); font-family: var(--font-ui); }
+  .pz-sets { font-family: var(--font-mono); font-size: .6em; line-height: 1.3; }
+  .pz-prio { text-align: center; font-weight: 700; font-size: .8em; line-height: 1; color: var(--blue); }
+  .pz-prio small { display: block; font-size: .7em; font-weight: 600; color: var(--grey); margin-bottom: .1em; }
+  .pz-dev { border: 3px solid var(--blue); border-radius: 18px; background: #f4f7ff; padding: .5em .5em .6em; text-align: center; }
+  .pz-dev .t { font-size: .6em; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--blue); }
+  .pz-dev .k { font-family: var(--font-mono); font-size: .56em; color: var(--grey); margin: .4em 0 .2em; }
+  .pz-dev .v { display: grid; justify-items: center; font-family: var(--font-mono); font-weight: 700; font-size: .72em; }
+  .pz-dev .v > span { grid-area: 1 / 1; }
+  .pz-dev .v .new { color: #fff; background: var(--blue); border-radius: 8px; padding: 0 .3em; }
+  .pz-res2 { text-align: left; font-size: .6em; }
+  .pz-res2 .k { display: block; margin-bottom: .3em; }
+  .pz-res2 .pz-line { display: grid; grid-template-columns: 41ch 14ch auto; column-gap: 1.2em; align-items: baseline; font-family: var(--font-mono); line-height: 1.5; white-space: nowrap; }
+  .pz-res2 .pz-line .p { color: var(--grey); }
+  .pz-res2 .pz-line .v, .pz-res2 .pz-line .t { display: grid; justify-items: start; }
+  .pz-res2 .pz-line .v { font-weight: 700; }
+  .pz-res2 .pz-line .t { font-family: var(--font-ui); font-weight: 400; font-size: .8em; color: var(--grey); }
+  .pz-res2 .pz-line .v > span, .pz-res2 .pz-line .t > span { grid-area: 1 / 1; }
+  .pz-res2 .pz-line .v .new { color: #fff; background: var(--blue); border-radius: 8px; padding: 0 .3em; }
+  .pz-sets { white-space: nowrap; }
+  .pz-stack { display: grid; grid-template-columns: max-content max-content max-content max-content; justify-content: start; gap: .4em 1.2em; }
+  .pz-stack > .pz-card { display: grid; grid-template-columns: subgrid; grid-template-rows: auto auto; grid-column: 1 / -1; column-gap: 1.2em; row-gap: 0; }
+  .pz-stack > .pz-card > .pz-name { grid-column: 1; grid-row: 1 / 3; }
+  .pz-stack > .pz-card > .pz-prio { grid-column: 4; grid-row: 1 / 3; align-self: center; }
+  .pz-stack > .pz-card { position: relative; }
+  .pz-del { position: absolute; inset: 0; background: rgba(255,255,255,.7); pointer-events: none; }
+  .pz-stack > .pz-card:has(.pz-del.visible) :is(.pz-name, .pz-x, .pz-val, .pz-prio) { text-decoration: line-through; text-decoration-color: #dc2626; text-decoration-thickness: 2px; }
+  .pz-x, .pz-val { font-family: var(--font-mono); font-size: .6em; line-height: 1.5; white-space: nowrap; padding: .15em 0; align-self: center; }
+  .pz-x { color: var(--grey); }
+  .pz-val { font-weight: 700; }
+  .pz-name, .pz-who { white-space: nowrap; }
+  .pz-stack > .pz-card { padding: 0 .8em 0 0; overflow: hidden; }
+  .pz-stack > .pz-card > .pz-name { align-self: stretch; display: flex; flex-direction: column; justify-content: center; padding: .4em .9em; background: rgba(26,86,219,.08); border-right: 2px solid #c9d6f5; }
+  .pz-stack > .pz-card > .pz-sets, .pz-stack > .pz-card > .pz-prio { padding: .4em 0; }
+  .pz { max-width: 1040px; }
+  .pz-rule { margin-top: .7em; font-size: .72em; line-height: 1.3; }
+  .pz-rule b { color: var(--blue); }
+
+  /* title slide */
+  .reveal .slides section.title-slide { text-align: center; padding-top: 150px; }
+  .reveal .slides section.title-slide h1 {
+    font-size: 1.28em; line-height: 1.2; max-width: 92%; margin: 0 auto; font-weight: 700;
+  }
+  .title-venue {
+    display: inline-block; font-size: .62em; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--blue); border: 2px solid #c9d6f5; border-radius: 999px;
+    padding: .3em 1.1em; margin-bottom: .8em; background: #f4f7ff;
+  }
+  .reveal .title-thesis { font-size: .8em; color: #334155; max-width: 82%; margin: .7em auto 0; line-height: 1.3; font-style: italic; text-align: center; }
+  .title-rule {
+    width: 72px; height: 4px; border-radius: 2px; background: var(--blue);
+    margin: .8em auto .9em; opacity: .85;
+  }
+  /* presenters on the title slide */
+  .presenters { display: flex; gap: 1.6em; justify-content: center; align-items: center; }
+  .presenter { display: flex; align-items: center; gap: .6em; text-align: left; padding: .35em 1em .35em .4em; border: 2px solid #dbe4f7; border-radius: 999px; background: #f8faff; }
+  .presenter .photo, .presenter .avatar { width: 78px; height: 78px; border-radius: 50%; flex: none; }
+  .presenter .avatar { display: flex; align-items: center; justify-content: center; background: #e4edff; color: #1e3a8a; font-weight: 700; font-size: .8em; border: 3px solid #c9d6f5; box-sizing: border-box; }
+  .presenter .photo { object-fit: cover; border: 3px solid #c9d6f5; box-sizing: border-box; margin: 0; box-shadow: none; }
+  .presenter .pname { font-size: .74em; font-weight: 700; color: #1e3a8a; line-height: 1.15; }
+  .presenter .prole { font-size: .56em; color: #334155; line-height: 1.25; }
+  .presenter .prole b { color: var(--blue); }
+
+  /* 5G mobile core intro */
+  .fivegc-wrap {
+    display: flex; align-items: stretch; gap: 0; margin: 0;
+    min-height: 500px;
+  }
+  .fivegc-copy { flex: 0 0 52%; padding-right: 1em; }
+  .fivegc-copy h2 { font-size: 1.15em; margin-bottom: .45em; line-height: 1.15; }
+  .reveal .fivegc-points {
+    list-style: none; padding: 0; margin: 0; font-size: .8em; color: #334155; line-height: 1.3;
+  }
+  .fivegc-points > li { margin: .45em 0; padding-left: 1em; position: relative; }
+  .fivegc-points > li::before {
+    content: ''; position: absolute; left: 0; top: .5em; width: 9px; height: 9px;
+    border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px #e8efff;
+  }
+  .fivegc-points .lead { font-weight: 700; color: #1e293b; }
+  .reveal .fivegc-points ul { margin: .15em 0 0; padding: 0 0 0 1em; list-style: disc; font-size: .88em; color: #475569; }
+  .fivegc-points ul li { margin: .1em 0; }
+  .fivegc-points .stat { font-weight: 700; color: #0f172a; }
+  .fivegc-visual {
+    flex: 1; min-width: 0; border-radius: 22px;
+    background: linear-gradient(155deg, #1e40af 0%, #1a56db 42%, #3b82f6 100%);
+    box-shadow: 0 12px 40px rgba(26, 86, 219, .28), inset 0 1px 0 rgba(255,255,255,.12);
+    display: flex; align-items: center; justify-content: center; padding: .55em .65em;
+    position: relative; overflow: hidden;
+  }
+  .fivegc-visual::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 20%, rgba(255,255,255,.14), transparent 55%);
+    pointer-events: none;
+  }
+  .fivegc-cluster-svg { display: block; width: 100%; max-height: 480px; position: relative; z-index: 1; }
+
+  /* "configuration of applications" story (4 slides, shared diagram) */
+  .cfg-wrap { display: flex; align-items: flex-start; gap: 1.1em; min-height: 500px; }
+  .cfg-copy { flex: 0 0 48%; }
+  .cfg-stages { display: flex; flex-wrap: wrap; gap: .35em; margin-bottom: .7em; font-size: .56em; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .cfg-stages span { padding: .25em .8em; border-radius: 999px; background: #f1f5f9; color: #64748b; border: 2px solid transparent; }
+  .cfg-stages span.done { color: #475569; background: #e8efff; }
+  .cfg-stages span.on { color: #fff; background: var(--blue); box-shadow: 0 3px 10px rgba(26,86,219,.3); }
+  .cfg-stages span.on.warn { background: #d97706; box-shadow: 0 3px 10px rgba(217,119,6,.3); }
+  .cfg-stages span.on.bad  { background: var(--red); box-shadow: 0 3px 10px rgba(192,57,43,.3); }
+  .cfg-stages span.on.ok   { background: #059669; box-shadow: 0 3px 10px rgba(5,150,105,.3); }
+  .cfg-copy h2 { font-size: 1.12em; line-height: 1.15; margin-bottom: .4em; }
+  .cfg-copy pre { font-size: .62em; margin: .2em 0 .5em; }
+  .reveal .cfg-points { list-style: none; padding: 0; margin: 0; font-size: .72em; color: #334155; line-height: 1.3; }
+  .cfg-points li { margin: .4em 0; padding-left: 1em; position: relative; }
+  .cfg-points li::before { content: ''; position: absolute; left: 0; top: .5em; width: 9px; height: 9px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 3px #e8efff; }
+  .cfg-points.bad-list li::before { background: var(--red); box-shadow: 0 0 0 3px #fbe4e1; }
+  .cfg-points.ok-list li::before { background: #059669; box-shadow: 0 0 0 3px #d5f3e4; }
+  .cfg-points b { color: #1e293b; }
+  .cfg-tag { display: inline-block; margin-top: .3em; font-size: .62em; font-weight: 700; padding: .25em .8em; border-radius: 10px; }
+  .cfg-tag.ok { background: #d5f3e4; color: #047857; }
+  .cfg-tag.warn { background: #fdecc8; color: #b45309; }
+  .cfg-tag.bad { background: #fbe4e1; color: var(--red); }
+  .cfg-diagram { flex: 1; min-width: 0; background: linear-gradient(160deg, #f8fafc, #eef2ff); border: 1px solid #dbeafe; border-radius: 20px; padding: .5em; box-shadow: 0 8px 28px rgba(30,64,175,.1); }
+  .cfg-svg { display: block; width: 100%; max-height: 500px; }
+
+  /* Kubernetes Resource Model slide */
+  .krm-row { display: flex; align-items: stretch; justify-content: center; gap: .3em; margin-top: .6em; }
+  .krm-card {
+    flex: 1; max-width: 31%; background: #fff; border: 2px solid #c9d6f5; border-radius: 20px;
+    padding: .9em .7em 1em; text-align: center; box-shadow: 0 6px 22px rgba(30,64,175,.08);
+    border-top-width: 6px;
+  }
+  .krm-card.c1 { border-top-color: #a3318f; } .krm-card.c2 { border-top-color: #5b3fc0; } .krm-card.c3 { border-top-color: #1a56db; }
+  .krm-icon { width: 72px; height: 72px; border-radius: 50%; margin: 0 auto .5em; display: flex; align-items: center; justify-content: center; }
+  .krm-card.c1 .krm-icon { background: #f8e8f5; } .krm-card.c2 .krm-icon { background: #ece8fb; } .krm-card.c3 .krm-icon { background: #e4edff; }
+  .krm-icon svg { width: 40px; height: 40px; }
+  .krm-card h3 { font-size: .92em; margin: 0 0 .3em; color: #0f172a; font-weight: 700; }
+  .krm-card p { font-size: .72em; color: #475569; margin: 0; line-height: 1.3; }
+  .krm-card .krm-code { display: inline-block; margin-top: .8em; font-family: var(--font-mono); font-size: .62em; background: #f6f8fa; border-radius: 8px; padding: .4em .7em; color: #334155; text-align: left; line-height: 1.4; }
+  .krm-arrow { align-self: center; font-size: 1.3em; color: var(--blue); font-weight: 700; }
+  .krm-foot { text-align: center; margin-top: 1em; font-size: .82em; color: #334155; }
+  .krm-foot b { color: var(--blue); }
+
+  /* operators slide */
+  .op-wrap { display: flex; align-items: center; gap: 1.1em; margin-top: .2em; }
+  .op-copy { flex: 0 0 47%; }
+  .op-label { font-size: .56em; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #64748b; margin: .8em 0 .35em; }
+  .op-label:first-child { margin-top: 0; }
+  .op-steps { display: flex; flex-direction: column; gap: .3em; }
+  .op-step { display: flex; align-items: center; gap: .6em; font-size: .72em; font-weight: 600; color: #1e293b; background: #f4f7ff; border: 2px solid #c9d6f5; border-radius: 12px; padding: .25em .7em; }
+  .op-step .n { flex: none; width: 1.5em; height: 1.5em; border-radius: 50%; background: var(--blue); color: #fff; font-size: .8em; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: .3em; }
+  .chip { font-size: .6em; font-weight: 600; padding: .2em .75em; border-radius: 999px; background: #fff; border: 2px solid #c9d6f5; color: #334155; }
+  .chip.k8s { background: #e8efff; border-color: #b7c9f3; color: #1e3a8a; }
+  .chip.third { background: #f5f3ff; border-color: #d4cdf7; color: #4c1d95; }
+  .chip.off { background: #f1f5f9; border-color: #e2e8f0; color: #94a3b8; text-decoration: line-through; }
+
+  /* protocols slide */
+  .pr-row { display: flex; gap: .8em; margin-top: .6em; }
+  .pr-card { position: relative; flex: 1; background: #fff; border: 2px solid #c9d6f5; border-top: 6px solid var(--blue); border-radius: 18px; padding: .6em .8em .8em; box-shadow: 0 6px 20px rgba(30,64,175,.08); }
+  .pr-card.off { border-top-color: #cbd5e1; background: #f8fafc; box-shadow: none; }
+  .pr-card.off h3 { color: #64748b; }
+  .pr-card h3 { font-size: 1em; margin: 0 0 .3em; text-align: center; }
+  .pr-card .op-label { margin: .6em 0 .3em; }
+  .pr-card .chip { font-size: .68em; }
+  .pr-badge { display: block; margin: 0 auto .1em; width: fit-content; font-size: .56em; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: .15em .8em; border-radius: 999px; }
+  .pr-badge.yes { background: #d5f3e4; color: #047857; }
+  .pr-badge.no  { background: #e2e8f0; color: #475569; }
+  .pr-base { margin-top: .7em; border-radius: 16px; background: linear-gradient(90deg, #1e40af, #1a56db 55%, #3b82f6); color: #fff; padding: .5em 1em; display: flex; align-items: center; gap: .9em; box-shadow: 0 8px 24px rgba(26,86,219,.3); }
+  .pr-base .t { font-size: .8em; font-weight: 700; white-space: nowrap; }
+  .pr-base .t small { display: block; font-size: .62em; font-weight: 400; opacity: .9; }
+  .pr-base .pills { display: flex; gap: .4em; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
+  .pr-base .pill { font-size: .6em; font-weight: 600; background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.4); border-radius: 999px; padding: .2em .8em; }
+
+  /* yang slide */
+  .yg-row { display: flex; align-items: stretch; gap: .5em; margin-top: .1em; }
+  .yg-panel { flex: 1; min-width: 0; }
+  .yg-panel.cfg { flex: .6; }
+  .yg-panel .op-label { margin: 0 0 .3em; }
+  .yg-panel pre { margin: 0; width: 100%; font-size: .62em; line-height: 1.28; box-shadow: none; }
+  .yg-panel pre code { padding: .5em .8em; border-radius: 10px; overflow: visible; }
+  .yg-arrow { align-self: center; font-size: 1.4em; color: var(--blue); font-weight: 700; }
+  .yg-k { color: #1a56db; } .yg-t { color: #1a8a3a; } .yg-s { color: #0e7490; } .yg-x { color: #4338ca; }
+  .yg-checks { display: flex; gap: .5em; margin-top: .6em; }
+  .yg-check { flex: 1; font-size: .58em; border-radius: 12px; padding: .4em .8em; line-height: 1.3; }
+  .yg-check.ok { background: #e6f6ed; border: 2px solid #9fd8b5; color: #14532d; }
+  .yg-check.no { background: #fdf0ee; border: 2px solid #efb3ab; color: #7f1d1d; }
+  .yg-check code { font-family: Consolas, monospace; font-weight: 700; }
+
+  /* deck master (logo + slide chrome) */
+  /* The header is cloned INTO every slide by the script at the bottom (from <template id="chrome-tpl">),
+     so it scales with the 1280x720 canvas at any window size / projector resolution and also shows up in PDF export. */
+  .deck-chrome {
+    position: absolute; z-index: 40; left: 0; right: 0; top: 0;
+    height: 76px; padding: 6px 40px;
+    display: flex; align-items: center; gap: 24px;
+    pointer-events: none; box-sizing: border-box;
+  }
+  .deck-chrome::after {
+    content: ''; position: absolute; left: 40px; right: 40px; bottom: 0; height: 1px;
+    background: linear-gradient(90deg, #cbd5e1 0%, #e2e8f0 45%, transparent 100%);
+  }
+  .deck-brand { display: flex; align-items: center; gap: 10px; color: #1e3a8a; }
+  .deck-logo { height: 62px; width: auto; display: block; }
+  .deck-section { display: inline-flex; align-items: center; gap: .6em; font-size: 20px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #1e3a8a; background: #eef3ff; border: 2px solid #c9d6f5; border-radius: 999px; padding: 4px 16px; transition: opacity .2s; }
+  .deck-section[hidden] { display: none; }
+  .deck-section .who { font-weight: 600; letter-spacing: .02em; text-transform: none; color: #475569; }
+  .deck-section .who { display: none; }
+  .deck-section .who::before { content: '\00b7'; margin-right: .6em; color: #94a3b8; }
+  .deck-venue { margin-left: auto; font-size: 18px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; }
+  .reveal .slide-number {
+    font-family: inherit; font-size: 18px; font-weight: 600; color: #475569;
+    background: rgba(255,255,255,.92); padding: 3px 14px; border-radius: 999px;
+    border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(15,23,42,.06);
+    bottom: 14px !important; right: 24px !important; left: auto !important;
+  }
+  .reveal .progress { height: 4px; color: var(--blue); }
+</style>
+</head>
+
+<body>
+<!-- shared diagram parts for the "Configuration of Applications" slides -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="cfg-arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 z" fill="#3b82f6"/></marker>
+    <marker id="cfg-arr-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 z" fill="#d97706"/></marker>
+    <marker id="cfg-arr-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 z" fill="#c0392b"/></marker>
+    <marker id="cfg-arr-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,3 L0,6 z" fill="#059669"/></marker>
+    <g id="cfg-base" font-family="'Segoe UI', Arial, sans-serif" font-size="18" text-anchor="middle" fill="#0f172a">
+      <rect x="10" y="10" width="440" height="380" rx="14" fill="#fff" stroke="#93b4f5" stroke-width="1.5" stroke-dasharray="6 5"/>
+      <text x="190" y="90" font-size="17" fill="#475569">consumer</text>
+      <path d="M190 98 V128" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#cfg-arr)"/>
+      <rect x="105" y="132" width="170" height="44" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+      <text x="190" y="160" font-weight="600">Service</text>
+      <path d="M190 176 V204" fill="none" stroke="#3b82f6" stroke-width="1.75" marker-end="url(#cfg-arr)"/>
+      <path d="M190 250 L137 295" fill="none" stroke="#3b82f6" stroke-width="1.75" marker-end="url(#cfg-arr)"/>
+      <path d="M190 250 L243 295" fill="none" stroke="#3b82f6" stroke-width="1.75" marker-end="url(#cfg-arr)"/>
+      <text x="262" y="276" font-size="16" fill="#475569">mount</text>
+      <rect x="85" y="298" width="100" height="56" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+      <text x="135" y="322" font-weight="600" font-size="17">Config</text><text x="135" y="342" font-weight="600" font-size="17">Map</text>
+      <rect x="195" y="298" width="100" height="56" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+      <text x="245" y="332" font-weight="600" font-size="17">Secret</text>
+    </g>
+  </defs>
+</svg>
+<!-- slide header (logo, section marker, venue): cloned into every slide by the script at the bottom -->
+<template id="chrome-tpl">
+  <header class="deck-chrome" aria-hidden="true">
+    <div class="deck-brand">
+      <!-- https://github.com/sdcio/docs/tree/main/docs/assets/logos -->
+      <img class="deck-logo" src="assets/logos/SDC-logo.svg" width="627.5" height="770.5" alt="">
+    </div>
+    <span class="deck-section" hidden><span class="what"></span><span class="who"></span></span>
+    <span class="deck-venue">SwiNOG #42</span>
+  </header>
+</template>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ TITLE -->
+<section class="title-slide" data-state="title">
+  <p class="title-venue">SwiNOG #42</p>
+  <h1>The Cloud-Native Advantage:<br>Intent-based Network Automation</h1>
+  <p class="title-thesis">Kubernetes already runs our network functions.<br>It should configure them, too.</p>
+  <div class="title-rule" aria-hidden="true"></div>
+  <div class="presenters">
+    <div class="presenter">
+      <img class="photo" src="assets/alex.jpg" width="156" height="156" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar',textContent:'AN'}))">
+      <div><div class="pname">Alexander North</div><div class="prole">Senior DevOps Engineer &middot; <b>Swisscom</b></div></div>
+    </div>
+    <div class="presenter">
+      <img class="photo" src="assets/markus.jpg" width="156" height="156" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'avatar',textContent:'MV'}))">
+      <div><div class="pname">Markus Vahlenkamp</div><div class="prole">Technology &amp; Architecture Consultant &middot; <b>Nokia</b></div></div>
+    </div>
+  </div>
+  <aside class="notes">
+    Welcome. Joint session. Alexander: the problem and the building blocks (Kubernetes resources, operators, protocols, YANG). Markus: SDC, from "Joining the Worlds" up to the end of the blame slide. Alexander again: demo, from intent to device config, results, take-aways.
+    Thesis in one breath: Kubernetes already runs our network functions; their configuration is the part that is still imperative. That is what the next 25 minutes are about.
+    The presenters are introduced right here (name, role, company); no separate speaker slide. Contact details are on the last slide.
+    Keep this slide up while people settle.
+  </aside>
+</section>
+
+<!-- ============================================================ 5G MOBILE CORE -->
+<section class="fivegc-slide" data-sec="The problem" data-who="Alexander">
+  <div class="fivegc-wrap">
+    <div class="fivegc-copy">
+      <h2>What is a 5G Mobile Core?</h2>
+      <ul class="fivegc-points">
+        <li class="fragment">
+          <span class="lead">Each blue object</span> is a <b>CNF</b> (Cloud-Native Network Function)
+          <ul>
+            <li>&ldquo;Router&rdquo; (UPF)</li>
+            <li>&ldquo;Authentication Service&rdquo; (AUSF)</li>
+            <li>Helm deployed</li>
+          </ul>
+        </li>
+        <li class="fragment">
+          <span class="lead">Configuration is done via</span>
+          <ul>
+            <li>Helm Values</li>
+            <li>Configuration interfaces (NETCONF, REST)</li>
+          </ul>
+        </li>
+        <li class="fragment">
+          <span class="lead">Scale</span>
+          <ul>
+            <li>Development environment contains <span class="stat">~2000 Pods</span></li>
+            <li><span class="stat">5000 interdependent configuration parameters</span></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div class="fivegc-visual" aria-hidden="true">
+      <svg class="fivegc-cluster-svg" viewBox="0 0 420 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kubernetes cluster hosting 5G core network functions">
+        <defs>
+          <linearGradient id="fgc-panel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f8fafc"/>
+          </linearGradient>
+          <linearGradient id="fgc-hex" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#1d4ed8"/>
+          </linearGradient>
+          <filter id="fgc-shadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#1e3a8a" flood-opacity=".25"/>
+          </filter>
+        </defs>
+        <rect x="28" y="18" width="364" height="404" rx="22" fill="url(#fgc-panel)" stroke="#e2e8f0" stroke-width="1.5" filter="url(#fgc-shadow)"/>
+        <text x="210" y="44" text-anchor="middle" font-size="18" font-weight="700" fill="#1e40af">Kubernetes Cluster</text>
+        <!-- cell tower -->
+        <g transform="translate(210 78)" fill="#1a56db">
+          <path d="M0-18 L6 8 H-6 Z" opacity=".9"/>
+          <rect x="-2.5" y="8" width="5" height="14" rx="1"/>
+          <path d="M-14 22 Q0 10 14 22" fill="none" stroke="#3b82f6" stroke-width="2" opacity=".7"/>
+          <path d="M-20 28 Q0 14 20 28" fill="none" stroke="#60a5fa" stroke-width="1.5" opacity=".5"/>
+        </g>
+        <!-- NF hex grid (abbreviations from a typical 5GC) -->
+        <g font-size="12.5" font-weight="700" fill="#fff" text-anchor="middle">
+          <g transform="translate(118 118)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">UDR</text></g>
+          <g transform="translate(210 108)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">SMF</text></g>
+          <g transform="translate(302 118)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">NSSF</text></g>
+          <g transform="translate(88 188)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">PCF</text></g>
+          <g transform="translate(168 178)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">AMF</text></g>
+          <g transform="translate(252 178)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">NRF</text></g>
+          <g transform="translate(332 188)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">BSF</text></g>
+          <g transform="translate(118 258)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">CHF</text></g>
+          <g transform="translate(210 248)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" opacity=".95" filter="url(#fgc-shadow)"/><text y="4">AUSF</text></g>
+          <g transform="translate(302 258)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">UDM</text></g>
+          <g transform="translate(210 328)"><polygon points="0,-22 19,-11 19,11 0,22 -19,11 -19,-11" fill="url(#fgc-hex)" filter="url(#fgc-shadow)"/><text y="4">LMF</text></g>
+        </g>
+        <!-- faint pod mesh lines -->
+        <g stroke="#93c5fd" stroke-width="1" opacity=".35" fill="none">
+          <path d="M118 140 L210 130 L302 140"/>
+          <path d="M168 200 L252 200"/>
+          <path d="M118 280 L210 270 L302 280"/>
+          <path d="M210 130 L168 200 L118 280"/>
+          <path d="M210 130 L252 200 L302 280"/>
+        </g>
+        <!-- server racks hint -->
+        <g fill="#22c55e" opacity=".85">
+          <rect x="52" y="368" width="14" height="22" rx="2"/><rect x="70" y="362" width="14" height="28" rx="2"/>
+          <rect x="336" y="368" width="14" height="22" rx="2"/><rect x="354" y="362" width="14" height="28" rx="2"/>
+        </g>
+        <text x="210" y="408" text-anchor="middle" font-size="13.5" font-weight="600" fill="#475569">Each hex ≈ one CNF workload (pod)</text>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    Alexander sets the scene: Swisscom 5G core as cloud-native workloads on Kubernetes, not a monolith.
+    Emphasise the configuration sprawl: Helm values plus device-style interfaces, thousands of pods and ~5000 coupled parameters.
+    This is the problem statement before Kubernetes control loops and intent-based automation.
+  </aside>
+</section>
+
+<!-- ============================================================ CONFIG OF APPLICATIONS (4 slides) -->
+<!-- A. cloud-native app -->
+<section class="cfg-slide" data-sec="The problem" data-who="Alexander">
+  <div class="cfg-wrap">
+    <div class="cfg-copy">
+      <div class="cfg-stages"><span class="on">App</span><span>Database</span><span>Network function</span><span>Today</span></div>
+      <h2>A cloud-native app: one declarative step</h2>
+<pre><code class="language-bash" data-trim data-noescape>$ kubectl apply -f app.yaml
+deployment.apps/app created</code></pre>
+      <ul class="cfg-points">
+        <li class="fragment"><b>Desired state</b> is declared; Kubernetes makes it so</li>
+        <li class="fragment">Configuration = <b>ConfigMap + Secret</b>, mounted into the pod</li>
+        <li class="fragment">Same tool, same workflow for <b>every</b> app</li>
+      </ul>
+      <span class="cfg-tag ok fragment">&#10003; fully declarative</span>
+    </div>
+    <div class="cfg-diagram">
+      <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cloud native application: consumer, service, deployment, ConfigMap and Secret">
+        <use href="#cfg-base"/>
+        <g font-family="'Segoe UI', Arial, sans-serif" font-size="18" text-anchor="middle" fill="#0f172a">
+          <text x="230" y="44" font-size="20" font-weight="600">Cloud Native Application</text>
+          <rect x="105" y="206" width="170" height="44" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+          <text x="190" y="234" font-weight="600">Deployment</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    Start simple: a normal cloud-native app. Service in front, Deployment behind, configuration via ConfigMap and Secret mounted into the pod. One kubectl apply, desired state, Kubernetes reconciles. Everybody in the room knows this. Next: what happens when the workload is not so simple.
+  </aside>
+</section>
+
+<!-- B. database -->
+<section class="cfg-slide" data-sec="The problem" data-who="Alexander">
+  <div class="cfg-wrap">
+    <div class="cfg-copy">
+      <div class="cfg-stages"><span class="done">App</span><span class="on warn">Database</span><span>Network function</span><span>Today</span></div>
+      <h2>A database: one extra, imperative step</h2>
+<pre><code class="language-bash" data-trim data-noescape>$ kubectl apply -f db.yaml   # the pod
+$ psql -c "CREATE DATABASE orders"</code></pre>
+      <ul class="cfg-points">
+        <li class="fragment">The deployment is declarative, but <b>creating the database</b> is a call into the running service</li>
+        <li class="fragment">Operators close the gap: the database becomes <b>a custom resource</b></li>
+      </ul>
+      <span class="cfg-tag warn fragment">&#9888; works, once an operator exists</span>
+    </div>
+    <div class="cfg-diagram">
+      <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Database: same stack plus an imperative CREATE DATABASE call into the service">
+        <use href="#cfg-base"/>
+        <g font-family="'Segoe UI', Arial, sans-serif" font-size="18" text-anchor="middle" fill="#0f172a">
+          <text x="230" y="44" font-size="20" font-weight="600">Database</text>
+          <rect x="105" y="206" width="170" height="44" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+          <text x="190" y="234" font-weight="600">DB deployment</text>
+          <path d="M320 154 H282" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#cfg-arr-amber)"/>
+          <rect x="320" y="124" width="124" height="60" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+          <text x="382" y="148" font-size="16" font-weight="700" fill="#b45309">CREATE</text>
+          <text x="382" y="170" font-size="16" font-weight="700" fill="#b45309">DATABASE</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    Same picture, but now there is something that is not a Kubernetes object: CREATE DATABASE is an imperative call into the running service. The Kubernetes answer is the operator pattern: model the database as a custom resource so that kubectl apply covers it too. (The YAML in the demo snippet is illustrative.) Keep this slide short; it exists to set up the next one.
+  </aside>
+</section>
+
+<!-- C. network function -->
+<section class="cfg-slide" data-sec="The problem" data-who="Alexander">
+  <div class="cfg-wrap">
+    <div class="cfg-copy">
+      <div class="cfg-stages"><span class="done">App</span><span class="done">Database</span><span class="on bad">Network function</span><span>Today</span></div>
+      <h2>A network function: a different world</h2>
+<pre><code class="language-bash" data-trim data-noescape>$ helm install upf ./upf   # the pod
+$ ssh -s upf netconf       # the config
+&lt;edit-config&gt;...&lt;/edit-config&gt;</code></pre>
+      <ul class="cfg-points bad-list">
+        <li class="fragment">Helm deploys the pod; the real config sits behind <b>NETCONF</b> and YANG</li>
+        <li class="fragment"><b>Imperative</b>, session-based RPCs, per instance</li>
+        <li class="fragment">No desired state, no reconcile loop, <b>no kubectl</b></li>
+      </ul>
+      <span class="cfg-tag bad fragment">&#10007; not cloud-native, yet</span>
+    </div>
+    <div class="cfg-diagram">
+      <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cloud-native network function: same stack, but configured through NETCONF RFC 6241">
+        <use href="#cfg-base"/>
+        <g font-family="'Segoe UI', Arial, sans-serif" font-size="18" text-anchor="middle" fill="#0f172a">
+          <text x="230" y="36" font-size="18" font-weight="600">&laquo;Cloud-Native&raquo; Network Function</text>
+          <text x="230" y="60" font-size="16" fill="#475569">(Telco App)</text>
+          <rect x="105" y="206" width="170" height="44" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+          <text x="190" y="234" font-weight="600">NF deployment</text>
+          <path d="M320 154 H282" fill="none" stroke="#c0392b" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#cfg-arr-red)"/>
+          <rect x="320" y="124" width="124" height="60" rx="8" fill="#fdf2f1" stroke="#c0392b" stroke-width="2"/>
+          <text x="382" y="148" font-size="16" font-weight="700" fill="#c0392b">NETCONF</text>
+          <text x="382" y="170" font-size="15" fill="#c0392b">RFC 6241</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    Same stack again. The network function is deployed like any workload, but its actual configuration is not a ConfigMap: it lives behind NETCONF/YANG, configured with imperative RPCs (edit-config, commit), and someone (a script, a human, a Helm hook) has to keep it right. Thousands of interdependent parameters. This is the gap: everything around the NF is declarative, its configuration is not. (Alexander: connect to the ~5000 parameters on the 5G core slide.)
+  </aside>
+</section>
+
+<!-- ============================================================ TODAY: IMPERATIVE APPROACH -->
+<section class="cfg-slide" data-sec="The problem" data-who="Alexander">
+  <div class="cfg-wrap">
+    <div class="cfg-copy">
+      <div class="cfg-stages"><span class="done">App</span><span class="done">Database</span><span class="done">Network function</span><span class="on bad">Today</span></div>
+      <h2>How we configure them today</h2>
+      <ul class="cfg-points bad-list">
+        <li class="fragment"><b>One-shot:</b> the pipeline pushes once and moves on</li>
+        <li class="fragment"><b>Slow iterations:</b> every change goes through the pipeline</li>
+        <li class="fragment"><b>No monitoring:</b> nobody watches the result</li>
+        <li class="fragment">Traceability <b>or</b> a holistic view, not both</li>
+      </ul>
+    </div>
+    <div class="cfg-diagram">
+      <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Imperative approach: a Jenkins pipeline triggers Ansible, which reads from git and pushes configuration to CNF1 and CNF2 in a Kubernetes cluster">
+        <g font-family="'Segoe UI', Arial, sans-serif" font-size="16" text-anchor="middle" fill="#0f172a">
+          <!-- pipeline -->
+          <path d="M100 18 H336 L362 44 L336 70 H100 L126 44 Z" fill="#e8efff" stroke="#3b82f6" stroke-width="1.75"/>
+          <text x="231" y="42" font-weight="700" font-size="17" fill="#1e3a8a">Jenkins pipeline</text>
+          <text x="231" y="60" font-size="14" fill="#475569">Configuration</text>
+          <path d="M230 72 V108" fill="none" stroke="#3b82f6" stroke-width="2.25" marker-end="url(#cfg-arr)"/>
+          <text x="242" y="94" font-size="15" text-anchor="start" fill="#475569">trigger</text>
+          <!-- ansible -->
+          <polygon points="230,112 262,129 262,157 230,174 198,157 198,129" fill="#fff" stroke="#3b82f6" stroke-width="2"/>
+          <text x="230" y="148" font-weight="700" font-size="15">Ansible</text>
+          <!-- git repo -->
+          <rect x="30" y="112" width="82" height="66" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.75"/>
+          <text x="71" y="136" font-size="16" font-weight="700" fill="#475569">git</text>
+          <text x="71" y="164" font-size="20" font-weight="700" fill="#94a3b8" font-family="Consolas, monospace">&lt;/&gt;</text>
+          <path d="M196 143 H118" fill="none" stroke="#3b82f6" stroke-width="2.25" marker-end="url(#cfg-arr)"/>
+          <text x="157" y="134" font-size="15" fill="#475569">read</text>
+          <!-- cluster -->
+          <rect x="40" y="236" width="380" height="146" rx="22" fill="#f8fbff" stroke="#3b82f6" stroke-width="1.75" stroke-dasharray="7 5"/>
+          <text x="60" y="376" font-size="16" font-weight="700" text-anchor="start" fill="#1a56db">Kubernetes cluster</text>
+          <path d="M222 176 L172 290" fill="none" stroke="#3b82f6" stroke-width="2.25" marker-end="url(#cfg-arr)"/>
+          <path d="M238 176 L288 290" fill="none" stroke="#3b82f6" stroke-width="2.25" marker-end="url(#cfg-arr)"/>
+          <text x="292" y="204" font-size="15" text-anchor="start" fill="#475569">push config</text>
+          <text x="292" y="224" font-size="15" text-anchor="start" fill="#475569">to CNFs</text>
+          <polygon points="170,294 198,310 198,342 170,358 142,342 142,310" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+          <text x="170" y="332" font-size="15" font-weight="600">CNF1</text>
+          <polygon points="290,294 318,310 318,342 290,358 262,342 262,310" fill="#fff" stroke="#3b82f6" stroke-width="1.75"/>
+          <text x="290" y="332" font-size="15" font-weight="600">CNF2</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    Where we are today: a pipeline (Jenkins) triggers Ansible, Ansible reads the configuration from git and pushes it to each CNF. It works, but it is a one-shot push: slow iterations, hardly any monitoring of what actually ended up on the device, and you get either traceability (git history) or a holistic view (what is running now), not both.
+    Everything around the network function is declarative; its configuration is not. Next: what Kubernetes gives us to close that gap (KRM, operators), and what the network world gives us (protocols, YANG).
+  </aside>
+</section>
+
+<!-- ============================================================ KRM -->
+<section data-sec="Building blocks" data-who="Alexander">
+  <h2>Kubernetes Resource Model (KRM)</h2>
+  <div class="krm-row">
+    <div class="krm-card c1 fragment" data-fragment-index="1">
+      <div class="krm-icon"><svg viewBox="0 0 40 40" fill="none" stroke="#a3318f" stroke-width="3" stroke-linecap="round"><path d="M20 6 V34 M6 20 H34"/></svg></div>
+      <h3>API extensions</h3>
+      <p>Custom Resource Definitions extend the Kubernetes API.</p>
+      <span class="krm-code">kind: CustomResourceDefinition</span>
+    </div>
+    <div class="krm-arrow fragment" data-fragment-index="2">&rsaquo;</div>
+    <div class="krm-card c2 fragment" data-fragment-index="2">
+      <div class="krm-icon"><svg viewBox="0 0 40 40" fill="none" stroke="#5b3fc0" stroke-width="3" stroke-linejoin="round"><rect x="12" y="6" width="22" height="18" rx="3"/><rect x="5" y="15" width="22" height="18" rx="3" fill="#ece8fb"/></svg></div>
+      <h3>CRs as Instances</h3>
+      <p>Custom Resources instantiate a CRD.</p>
+      <span class="krm-code">kind: Config<br>name: upf-config</span>
+    </div>
+    <div class="krm-arrow fragment" data-fragment-index="3">&rsaquo;</div>
+    <div class="krm-card c3 fragment" data-fragment-index="3">
+      <div class="krm-icon"><svg viewBox="0 0 40 40" fill="none" stroke="#1a56db" stroke-width="3" stroke-linecap="round"><circle cx="20" cy="20" r="9"/><circle cx="20" cy="20" r="3.5"/><path d="M20 4 V9 M20 31 V36 M4 20 H9 M31 20 H36 M8.7 8.7 L12.2 12.2 M27.8 27.8 L31.3 31.3 M8.7 31.3 L12.2 27.8 M27.8 12.2 L31.3 8.7"/></svg></div>
+      <h3>Business Logic</h3>
+      <p>Use of Operators or templates to run custom logic.</p>
+      <span class="krm-code">watch &rarr; compare &rarr; act</span>
+    </div>
+  </div>
+  <p class="krm-foot fragment" data-fragment-index="4">Same API, same tooling (<b>kubectl</b>, RBAC, GitOps) for <b>anything</b> you can model.</p>
+  <aside class="notes">
+    KRM in three beats, left to right: a CRD extends the Kubernetes API with a new kind; a CR is an instance of that kind (just YAML, applied like any other object); an operator or controller adds the business logic that watches the resource and acts on it. The point for this talk: once something is a resource, it gets kubectl, RBAC, GitOps and the control loop for free. Next: that is exactly what we want for network function configuration.
+    Example names (Config, upf-config) are illustrative; the SDC part later uses the real kind (Config, config.sdcio.dev).
+  </aside>
+</section>
+
+<!-- ============================================================ KUBERNETES OPERATORS -->
+<section data-sec="Building blocks" data-who="Alexander">
+  <h2>Kubernetes Operators</h2>
+  <div class="op-wrap">
+    <div class="op-copy">
+      <div class="op-label">The control loop</div>
+      <div class="op-steps">
+        <div class="op-step fragment" data-fragment-index="1"><span class="n">1</span>Watches for changes</div>
+        <div class="op-step fragment" data-fragment-index="2"><span class="n">2</span>Performs action</div>
+        <div class="op-step fragment" data-fragment-index="3"><span class="n">3</span>Updates resources &#8635;</div>
+      </div>
+      <div class="op-label fragment" data-fragment-index="4">Built-in</div>
+      <div class="chips fragment" data-fragment-index="4"><span class="chip k8s">Deployment</span><span class="chip k8s">Job</span><span class="chip k8s">PersistentVolume</span></div>
+      <div class="op-label fragment" data-fragment-index="5">Third-party</div>
+      <div class="chips fragment" data-fragment-index="5"><span class="chip third">Prometheus Operator</span><span class="chip third">External Secrets Operator</span><span class="chip third">cert-manager</span></div>
+    </div>
+    <div class="cfg-diagram">
+      <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="User talks to the Kube API; the API manages custom and Kubernetes resources; the operator reads, writes and receives events from the API">
+        <g font-family="'Segoe UI', Arial, sans-serif" font-size="17" text-anchor="middle" fill="#0f172a">
+          <rect x="90" y="12" width="170" height="52" rx="10" fill="#fff" stroke="#6d4bc3" stroke-width="2"/>
+          <text x="175" y="45" font-weight="600">Custom Resources</text>
+          <rect x="290" y="12" width="160" height="52" rx="10" fill="#fff" stroke="#3b82f6" stroke-width="2"/>
+          <text x="370" y="35" font-weight="600">Kubernetes</text><text x="370" y="55" font-weight="600">Resources</text>
+          <path d="M240 148 L195 68" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#cfg-arr)"/>
+          <path d="M290 148 L350 68" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#cfg-arr)"/>
+          <text x="204" y="116" font-size="15" fill="#475569" text-anchor="end">manages</text>
+          <text x="338" y="116" font-size="15" fill="#475569" text-anchor="start">manages</text>
+          <rect x="6" y="150" width="86" height="52" rx="10" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+          <text x="49" y="183" font-weight="600">User</text>
+          <path d="M92 176 H198" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#cfg-arr)"/>
+          <text x="145" y="166" font-size="14" fill="#475569">read/write</text>
+          <rect x="200" y="150" width="130" height="52" rx="10" fill="#e8efff" stroke="#1a56db" stroke-width="2.25"/>
+          <text x="265" y="183" font-weight="700" fill="#1e3a8a">Kube API</text>
+          <path d="M240 290 V206" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#cfg-arr)"/>
+          <path d="M300 206 V290" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#cfg-arr-green)"/>
+          <text x="230" y="254" font-size="15" fill="#475569" text-anchor="end">read/write</text>
+          <text x="310" y="254" font-size="15" fill="#047857" text-anchor="start">events</text>
+          <rect x="200" y="292" width="130" height="68" rx="12" fill="#1a56db" stroke="#1e40af" stroke-width="2"/>
+          <text x="265" y="320" font-weight="700" fill="#fff">Operator</text>
+          <text x="265" y="347" font-size="24" fill="#fff">&#8635;</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    The control loop is the heart of Kubernetes: watch for changes, perform an action, update resources, repeat. Built-in controllers (Deployment, Job, PersistentVolume) work like this, and so do third-party operators (Prometheus Operator, External Secrets Operator, cert-manager). Diagram: the user only talks to the Kube API; the API stores custom and built-in resources; the operator reads/writes through the API and receives events when something changes. That is the pattern we want for network function configuration.
+  </aside>
+</section>
+
+<!-- ============================================================ NETWORK CONFIG PROTOCOLS -->
+<section data-sec="Building blocks" data-who="Alexander">
+  <h2>Network configuration protocols</h2>
+  <div class="pr-row">
+    <div class="pr-card">
+      <h3>NETCONF</h3>
+      <span class="pr-badge yes">&#10003; supported by SDC</span>
+      <div class="op-label">Transport</div><div class="chips"><span class="chip k8s">SSH</span></div>
+      <div class="op-label">Encoding</div><div class="chips"><span class="chip">XML</span></div>
+    </div>
+    <div class="pr-card">
+      <h3>gNMI</h3>
+      <span class="pr-badge yes">&#10003; supported by SDC</span>
+      <div class="op-label">Transport</div><div class="chips"><span class="chip k8s">gRPC</span></div>
+      <div class="op-label">Encoding</div><div class="chips"><span class="chip">PROTO</span><span class="chip">JSON</span><span class="chip">JSON_IETF</span></div>
+    </div>
+    <div class="pr-card off">
+      <h3>RESTCONF</h3>
+      <span class="pr-badge no">not supported yet</span>
+      <div class="op-label">Transport</div><div class="chips"><span class="chip k8s">HTTP(S)</span></div>
+      <div class="op-label">Encoding</div><div class="chips"><span class="chip">JSON_IETF</span><span class="chip">XML</span></div>
+    </div>
+  </div>
+  <div class="pr-base fragment">
+    <div class="t">YANG schema<small>the common base of all three</small></div>
+    <div class="pills"><span class="pill">Conversion between encodings</span><span class="pill">Validation</span></div>
+  </div>
+  <aside class="notes">
+    Three protocols, three transports, several encodings: this is what makes network configuration look messy from the outside. What they share is the YANG schema underneath. Because the schema describes the data, a tool can convert between encodings and validate a configuration regardless of the protocol used to deliver it. That is why SDC can speak NETCONF and gNMI without vendor-specific code.
+    RESTCONF is greyed out on purpose: SDC does not support it today (the protocol is a pluggable driver, so it is a possible addition, not a promise). Say that out loud if somebody asks.
+  </aside>
+</section>
+
+<!-- ============================================================ YANG -->
+<section data-sec="Building blocks" data-who="Alexander">
+  <h2>YANG &ndash; Network Function Schema</h2>
+  <div class="yg-row">
+    <div class="yg-panel">
+      <div class="op-label">Schema (YANG)</div>
+<pre><code><span class="yg-k">list</span> device {
+  <span class="yg-k">key</span> <span class="yg-s">"name"</span>;
+  <span class="yg-k">leaf</span> name { <span class="yg-k">type</span> <span class="yg-t">string</span>; }
+  <span class="yg-k">leaf</span> role {
+    <span class="yg-k">type</span> <span class="yg-t">enumeration</span> { <span class="yg-k">enum</span> spine; <span class="yg-k">enum</span> leaf; }
+    <span class="yg-k">mandatory</span> true;
+  }
+  <span class="yg-k">leaf</span> mgmt-ip {
+    <span class="yg-k">type</span> <span class="yg-t">inet:ipv4-address</span>;
+    <span class="yg-k">must</span> <span class="yg-s">"starts-with(., '10.')"</span> {
+      <span class="yg-k">error-message</span> "IP must be 10.x.x.x";
+    }
+  }
+}</code></pre>
+    </div>
+    <div class="yg-arrow">&rarr;</div>
+    <div class="yg-panel cfg">
+      <div class="op-label">Configuration (XML)</div>
+<pre><code><span class="yg-x">&lt;device&gt;</span>
+  <span class="yg-x">&lt;name&gt;</span>leaf-1<span class="yg-x">&lt;/name&gt;</span>
+  <span class="yg-x">&lt;role&gt;</span>leaf<span class="yg-x">&lt;/role&gt;</span>
+  <span class="yg-x">&lt;mgmt-ip&gt;</span>10.1.1.10<span class="yg-x">&lt;/mgmt-ip&gt;</span>
+<span class="yg-x">&lt;/device&gt;</span>
+<span class="yg-x">&lt;device&gt;</span>
+  <span class="yg-x">&lt;name&gt;</span>spine-1<span class="yg-x">&lt;/name&gt;</span>
+  <span class="yg-x">&lt;role&gt;</span>spine<span class="yg-x">&lt;/role&gt;</span>
+  <span class="yg-x">&lt;mgmt-ip&gt;</span>10.2.0.1<span class="yg-x">&lt;/mgmt-ip&gt;</span>
+<span class="yg-x">&lt;/device&gt;</span></code></pre>
+    </div>
+  </div>
+  <div class="yg-checks">
+    <div class="yg-check ok fragment"><b>&#10003; accepted</b><br><code>mgmt-ip 10.1.1.10</code></div>
+    <div class="yg-check no fragment"><b>&#10007; rejected</b><br><code>mgmt-ip 192.168.1.1</code>: IP must be 10.x.x.x</div>
+    <div class="yg-check no fragment"><b>&#10007; rejected</b><br><code>role router</code>: not one of spine, leaf</div>
+  </div>
+  <aside class="notes">
+    Left: the schema, a model of what a valid configuration looks like: a list of devices, a mandatory role from an enumeration, and a management IP that must be an IPv4 address in 10.x.x.x. Right: configuration data that conforms to it (shown as XML, the same data could be JSON). Bottom: the point of a schema: a value that violates it is rejected with a clear error before it ever reaches the device. This is the "validate" step of the wish list.
+    The schema is a simplified, illustrative example.
+  </aside>
+</section>
+
+<!-- ============================================================ 1. HANDOVER -->
+<section data-sec="SDC" data-who="Markus">
+  <h2 style="display:grid"><span class="fragment fade-out" data-fragment-index="1" style="grid-area:1/1">Separate Worlds</span><span class="fragment fade-in" data-fragment-index="1" style="grid-area:1/1">Joining the Worlds</span></h2>
+  <div class="worlds">
+    <div class="world">
+      <div class="wtitle">Network world</div>
+      <div class="card">(x)NF<small>physical · container · VM</small></div>
+      <div class="card">YANG model<small>its configuration interface</small></div>
+    </div>
+    <div class="bridge">
+      <div class="line top"></div>
+      <img class="sdc-logo fragment fade-in" data-fragment-index="1" src="assets/logos/SDC-logo.svg" alt="SDC">
+      <div class="line bottom"></div>
+
+    </div>
+    <div class="world">
+      <div class="wtitle">Kubernetes world</div>
+      <div class="card">Declarative intent<small>custom resources</small></div>
+      <div class="card">Control loop<small>watch · act · reconcile</small></div>
+    </div>
+  </div>
+  <p class="center small fragment fade-in" data-fragment-index="1" style="margin-top:1em">Cloud-native network configuration for anything YANG-modelled</p>
+  <div class="center fragment fade-in" data-fragment-index="1">
+    <ul class="tiny" style="display:inline-block; text-align:left; margin:.2em 0 0; padding-left:1.2em; line-height:1.5; list-style:disc">
+      <li>Initiated by Nokia</li>
+      <li>Open source since 2024</li>
+      <li>CNCF Sandbox since 2026</li>
+    </ul>
+  </div>
+  <aside class="notes">
+    TITLE: starts as "Separate Worlds" and switches to "Joining the Worlds" on the same click that brings in the logo.
+    BUILD: the slide opens with the two worlds only (the concepts Alexander introduced). The arrows between them are already there: that is the bridge that exists, the gap to be joined. One click: the SDC logo appears on the bridge together with the tagline and the three facts ("that is where SDC enters the stage").
+    Picture: two worlds and SDC as the bridge (not an equation: SDC is not the sum of the parts, it is the glue). Left: the network world, where the NF and its YANG model belong together (the YANG model IS the NF's configuration interface, spoken over NETCONF/gNMI). Right: the Kubernetes world: declarative intent as custom resources, and a control loop. SDC sits in the middle: it speaks YANG/NETCONF/gNMI towards the NF and CRs/control loop towards Kubernetes.
+    HANDOVER from Alexander: "Alexander introduced the concepts and protocols on both sides: Kubernetes with declarative resources and the control loop, network functions with YANG, NETCONF and gNMI. Now we need to join them, and that is where SDC enters the stage."
+    Introduce yourself in one sentence: Markus, Nokia, where SDC was created.
+    ~20 seconds, no more. Use the same icons/colours as Alexander's control-loop and YANG slides so the two parts visibly connect.
+    One breath of facts: vendor agnostic (no vendor-specific code: you give it the YANG models), (x)NF = PNF, CNF or VNF.
+    YANG is the hard requirement; the protocol is a pluggable driver. Today NETCONF and gNMI (chosen per target via the connection profile). The data-server's drivers all implement the same small Target interface (Get, Set, AddSyncs, Status, Close), so another protocol such as RESTCONF is "just" another driver - say it as a possibility, not a promise. Initiated by Nokia, open source since 2024, CNCF Sandbox since 2026.
+    Then: "What does that look like in practice?" -> next slide.
+  </aside>
+</section>
+
+<!-- ============================================================ 2. OPENER -->
+<section data-sec="SDC" data-who="Markus">
+  <h2><code>kubectl</code>, now for network functions</h2>
+<pre style="font-size:.74em"><code class="language-bash" data-trim data-noescape>$ kubectl apply -f new-interface.yaml
+config.sdcio.dev/new-interface created
+
+$ kubectl sdc runningconfig --target leaf-1 --format xpath
+...
+/network/interface[name=eth1]/admin-up: true
+/network/interface[name=eth1]/ipv4-address: 10.10.10.10
+/network/interface[name=eth1]/speed: 10G
+...</code></pre>
+  <p class="small">Same workflow for a deployment, a database, <b>and</b> a 5G core or any other network function.</p>
+  <aside class="notes">
+    The previous slide placed SDC between the two worlds; this one shows what that means in practice. Lead with the gap from Alexander's part (everything around the network function is declarative, its configuration was not), then: "with SDC it is". Pause, then show the commands.
+    This is the target picture for the whole talk: the same kubectl workflow as for a Deployment, now for network function configuration.
+    Point at it: a Kubernetes object, applied with kubectl, and the device's REAL running config read back through the same tooling, as xpath lines. "That is what SDC does. Let me show how."
+    Why runningconfig and not blame here: the opener proves 'apply -> it is on the device'. Blame needs a story (several intents, brownfield), so it comes later.
+    CLI facts (kubectl-sdc README): the plugin is 'kubectl sdc' (NOT 'kubectl sdcio'). runningconfig takes --target and --format (json, json_ietf, xml, xpath, yaml; default yaml). It has NO path filter, so it prints everything: the '...' mark that the output is trimmed (say "trimmed", or pipe through grep in the demo).
+    Config API group is config.sdcio.dev, so the 'created' line is right. Output is illustrative: replace with real demo output (same target name as in the demo), ~6 lines. Consider a CNF-flavoured example (UPF/SMF parameter) instead of leaf-1/eth1.
+    Say you will come back to this exact flow in the demo.
+  </aside>
+</section>
+
+<!-- ============================================================ 4. RESOURCES -->
+<section data-sec="Resources" data-who="Markus">
+  <h2>What you write, what you get back</h2>
+  <div class="rs-steps">
+    <div class="rs-step fragment" data-fragment-index="1">
+      <span class="rs-n in">1</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>You write</b> the infrastructure <span class="rs-api">inv.sdcio.dev</span></div>
+        <div class="chips"><span class="chip in">DiscoveryRule</span><span class="chip in">TargetConnectionProfile</span><span class="chip in">TargetSyncProfile</span><span class="chip in">Secret</span></div>
+        <div class="chips" style="margin-top:.45em; padding-top:.4em; border-top:1px dashed #c9d6f5; align-items:center"><span class="chip in">Schema</span><span style="font-size:.6em; color:#64748b">the YANG models to use, from Git</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="2">
+      <span class="rs-n out">2</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>SDC derives</b> one device per discovery <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip out">Target</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="3">
+      <span class="rs-n in">3</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>You write</b> the intent, applied to the Target <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip in">Config</span><span class="chip in">ConfigSet</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="4">
+      <span class="rs-n out">4</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>SDC reads back</b> what the device really has, brownfield included <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip out">RunningConfig</span><span class="chip out">Deviation</span><span class="chip out">ConfigBlame</span></div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    Researched against docs.sdcio.dev (config-server, target, discovery, config, configset, deviation). API is v1alpha1: re-check before the talk.
+
+    TWO API GROUPS (one sentence):
+    - inv.sdcio.dev (plain CRDs, etcd): Schema, DiscoveryRule, TargetConnectionProfile, TargetSyncProfile, plus Subscription (not on the slide).
+    - config.sdcio.dev (aggregated API server, Badger store, NOT etcd): Target, Config, ConfigSet, Deviation, RunningConfig, ConfigBlame. Why not etcd: a Config can hold a whole device config, megabytes, over etcd's ~1.5 MB object limit.
+
+    YOU WRITE:
+    - Schema: YANG provider + version (e.g. srl.nokia.sdcio.dev 24.10.1), from Git.
+    - DiscoveryRule: scans addresses/prefixes periodically, creates Targets. Provider/version via defaultSchema or detected via DiscoveryVendorProfile(s). Attaches connection profile, sync profile, credentials.
+    - TargetConnectionProfile: protocol (gNMI/NETCONF), port, encoding, NETCONF version, commit candidate, insecure/skipVerify.
+    - TargetSyncProfile: how SDC keeps its view of the device current: syncs with protocol, paths, mode (gNMI get/once/sample/on-change; NETCONF polls), interval. Feeds RunningConfig and deviation detection.
+    - Credentials: a Kubernetes Secret.
+    - Config: intent for ONE target (labels config.sdcio.dev/targetName and targetNamespace). path/value snippets, priority, lifecycle.deletionPolicy, revertive.
+    - ConfigSet: template with a targetSelector; creates/updates one Config per matching target and deletes the ones that no longer match. Ideal for fleet-wide settings and the 14-NF Swisscom case.
+
+    SDC DERIVES (created or computed by SDC, read-only for you):
+    - Target: normally created by the DiscoveryRule controller, not by the user (docs: "not explicitly created by an end user"). Say "documented way", not "impossible".
+    - RunningConfig: live device state via sync.
+    - Deviation: one per Target and one per Config CR. With no Config CR, ALL brownfield config is one UNHANDLED deviation per target.
+    - ConfigBlame: per-path ownership.
+    There is NO "UnManagedConfig" resource. Do not mention it.
+
+    The point that you don't write a Target (DiscoveryRule + connection profile + sync profile + schema produce it) is NOT on the slide any more: you have already said it earlier (e.g. while explaining the architecture / discovery). The table shows it implicitly: Target sits in the 'SDC derives' column. If you did not cover it earlier, say it once when the Device row appears.
+  </aside>
+</section>
+
+<!-- ============================================================ 5. INTENTS -->
+<section data-sec="Intents" data-who="Markus">
+  <h2>Configuration as intent</h2>
+  <div class="cols">
+    <div style="flex:1.2">
+<pre style="font-size:.66em"><code data-trim data-noescape>kind: Config
+metadata:
+  name: new-interface
+  labels:
+    <span class="ha hl-fr fragment custom" data-fragment-index="1">config.sdcio.dev/targetName: demo-device</span>
+spec:
+  <span class="hb hl-fr fragment custom" data-fragment-index="2">priority: 90</span>
+  <span class="hc hl-fr fragment custom" data-fragment-index="3">lifecycle:</span>
+    <span class="hc hl-fr fragment custom" data-fragment-index="3">deletionPolicy: delete</span>
+  <span class="he hl-fr fragment custom" data-fragment-index="4">revertive: true</span>
+  <span class="hd hl-fr fragment custom" data-fragment-index="5">config:</span>
+  <span class="hd hl-fr fragment custom" data-fragment-index="5">- path: /</span>
+    <span class="hd hl-fr fragment custom" data-fragment-index="5">value:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="5">interface:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="5">- name: eth1</span>
+        <span class="hd hl-fr fragment custom" data-fragment-index="5">ipv4-address: [10.10.10.10]</span></code></pre>
+    </div>
+    <div style="flex:.9">
+      <ul class="small" style="list-style:none; padding:0; margin:0">
+        <li class="fragment" data-fragment-index="1"><span class="ha">&nbsp;which device&nbsp;</span><br><span class="tiny">label pointing at the Target</span></li>
+        <li class="fragment" data-fragment-index="2" style="margin-top:.4em"><span class="hb">&nbsp;who wins&nbsp;</span><br><span class="tiny">if two Configs set the same leaf</span></li>
+        <li class="fragment" data-fragment-index="3" style="margin-top:.4em"><span class="hc">&nbsp;what if deleted&nbsp;</span><br><span class="tiny"><code>delete</code>: remove from device<br><code>orphan</code>: leave it</span></li>
+        <li class="fragment" data-fragment-index="4" style="margin-top:.4em"><span class="he">&nbsp;what if it drifts&nbsp;</span><br><span class="tiny"><code>revertive</code>: re-apply intent</span></li>
+        <li class="fragment" data-fragment-index="5" style="margin-top:.4em"><span class="hd">&nbsp;what to set&nbsp;</span><br><span class="tiny">only your part of the YANG tree</span></li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">
+    Key idea: you do NOT write the whole device config. Each Config is a snippet, so different teams/systems own different parts. That is why we need priority on the next slide.
+    Fragments colour-match the code. apiVersion/namespace left out to fit; show the full YAML as backup or in the demo.
+  </aside>
+</section>
+
+<section data-sec="Priority" data-who="Markus">
+  <h2>Intent resolution</h2>
+  <div class="pz">
+    <div class="pz-lane">
+      <div class="pz-stack">
+        <div class="pz-card p100" style="margin-left:0">
+          <span class="pz-name">initial-config<span class="pz-who">Platform &middot; baseline</span></span>
+          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">192.0.2.10</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/mtu</span><span class="pz-val" style="grid-column:3; grid-row:2">9000</span>
+          <span class="pz-prio"><small>prio</small>100</span>
+        </div>
+        <div class="pz-card p50 fragment" data-fragment-index="1" style="margin-left:0">
+          <span class="pz-name">overlap-config<span class="pz-who">Ops &middot; temp override</span></span>
+          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">20.20.20.20</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/description</span><span class="pz-val" style="grid-column:3; grid-row:2">uplink</span>
+          <span class="pz-prio"><small>prio</small>50</span>
+          <span class="pz-del fragment" data-fragment-index="3"></span>
+        </div>
+      </div>
+      <div class="pz-res pz-res2"><span class="k">device (merged result)</span>
+        <div class="pz-line">
+          <span class="p">/network/interface[name=eth0]/ipv4-address</span>
+          <span class="v">
+            <span class="fragment fade-out" data-fragment-index="1">192.0.2.10</span>
+            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3"><span class="new">20.20.20.20</span></span></span>
+            <span class="fragment" data-fragment-index="3">192.0.2.10</span>
+          </span>
+          <span class="t">
+            <span class="fragment fade-out" data-fragment-index="1">prio 100</span>
+            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3">prio 50 wins</span></span>
+            <span class="fragment" data-fragment-index="3">prio 100</span>
+          </span>
+        </div>
+        <div class="pz-line">
+          <span class="p">/network/interface[name=eth0]/mtu</span>
+          <span class="v"><span>9000</span></span>
+          <span class="t"><span>prio 100</span></span>
+        </div>
+        <div class="fragment" data-fragment-index="1">
+          <div class="pz-line fragment fade-out" data-fragment-index="3">
+            <span class="p">/network/interface[name=eth0]/description</span>
+            <span class="v"><span>uplink</span></span>
+            <span class="t"><span>prio 50</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pz-rule">
+    <p class="fragment" data-fragment-index="1" style="margin:0 0 .2em">The <b>lower</b> the priority number, the <b>higher</b> the precedence.</p>
+    <p class="fragment" data-fragment-index="2" style="margin:0 0 .2em">Without competition, the result is simply a <b>merge</b> of all intents.</p>
+    <p class="fragment" data-fragment-index="3" style="margin:0">Delete <code>overlap-config</code>: back to <code>192.0.2.10</code>, nothing was lost.</p>
+  </div>
+  <aside class="notes">
+    A story, not an abstraction: three owners with different roles; priority expresses who is allowed to win. Rule: lower number = higher precedence (docs: priority is a tie-breaker when Configs overlap). Say it out loud.
+    Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address 192.0.2.10 and mtu 9000. 2. Ops put a temporary override with prio 50: it sets the SAME leaf ipv4-address (20.20.20.20, wins because 50 beats 100) and a NEW leaf description (uplink). 3. Merged result: ipv4-address from the override, mtu from the baseline, description from the override: different leaves never compete, they are simply merged. 4. Delete the override: ipv4-address falls back to 192.0.2.10 and description goes away: the lower-priority intent was never lost.
+    The best demo of why this matters is the last bullet: the lower-priority intent is still stored, so removing the override restores it automatically. (With deletionPolicy delete, removing overlap-config also removes its values from the device; the baseline value then takes over.)
+    Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root node 'network' in this example model; use your real model's paths). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address of eth0). Setting different leaves, even under the same list entry, just merges.
+    Same Configs as in the blame slide (initial-config, new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
+    Briefly: ConfigSet exists for 'same snippet on many targets'; not needed here.
+  </aside>
+</section>
+
+<!-- ============================================================ INTENT PROCESSING (flow); backup pods slide stays Architecture -->
+<section data-sec="Intent processing" data-who="Markus">
+  <h2>An intent's journey to the device</h2>
+  <svg class="arch-svg" viewBox="0 0 1100 368" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="Intents with priorities, the device's running config and the YANG model are merged and validated into one config tree; only the delta is pushed to the device, which is read back">
+    <defs>
+      <marker id="fl-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#059669"/></marker>
+      <marker id="fl-s" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#64748b"/></marker>
+      <marker id="fl-a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#d97706"/></marker>
+      <marker id="fl-o" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#ea580c"/></marker>
+      <marker id="fl-v" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#7c3aed"/></marker>
+    </defs>
+
+    <!-- inputs -->
+    <rect x="10" y="15" width="300" height="90" rx="14" fill="url(#arch-node-blue)" stroke="#93c5fd" stroke-width="2"/>
+    <rect x="10" y="15" width="7" height="90" rx="3" fill="#2563eb"/>
+    <text x="165" y="48" text-anchor="middle" font-size="20" font-weight="700" fill="#1e3a8a">Intents</text>
+    <text x="165" y="72" text-anchor="middle" font-size="15" fill="#475569">Config resources, each with a priority</text>
+    <text x="165" y="92" text-anchor="middle" font-size="14" fill="#64748b">from Kubernetes (kubectl, GitOps)</text>
+
+    <rect x="10" y="130" width="300" height="90" rx="14" fill="url(#arch-node-gold)" stroke="#fcd34d" stroke-width="2"/>
+    <rect x="10" y="130" width="7" height="90" rx="3" fill="#d97706"/>
+    <text x="165" y="163" text-anchor="middle" font-size="20" font-weight="700" fill="#92400e">YANG model</text>
+    <text x="165" y="187" text-anchor="middle" font-size="15" fill="#475569">the device's own schema</text>
+    <text x="165" y="207" text-anchor="middle" font-size="14" fill="#64748b">from Git</text>
+
+    <rect x="10" y="245" width="300" height="90" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <rect x="10" y="245" width="7" height="90" rx="3" fill="#64748b"/>
+    <text x="165" y="278" text-anchor="middle" font-size="20" font-weight="700" fill="#334155">Running config</text>
+    <text x="165" y="302" text-anchor="middle" font-size="15" fill="#475569">what the device really has</text>
+    <text x="165" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">brownfield included</text>
+
+    <!-- SDC pipeline on the validated tree -->
+    <rect x="400" y="15" width="340" height="320" rx="16" fill="url(#arch-node-violet)" stroke="#c4b5fd" stroke-width="2"/>
+    <rect x="400" y="15" width="340" height="52" rx="16" fill="#ede9fe"/>
+    <text x="570" y="48" text-anchor="middle" font-size="21" font-weight="700" fill="#5b21b6">SDC: one config tree</text>
+    <rect x="425" y="78" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="101" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">1 Merge</text>
+    <text x="570" y="120" text-anchor="middle" font-size="14" fill="#475569">overlaps resolved by priority</text>
+    <rect x="425" y="144" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="167" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">2 Validate</text>
+    <text x="570" y="186" text-anchor="middle" font-size="14" fill="#475569">the whole result, against YANG</text>
+    <rect x="425" y="210" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="233" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">3 Diff</text>
+    <text x="570" y="252" text-anchor="middle" font-size="14" fill="#475569">tree versus what is on the device</text>
+    <rect x="425" y="276" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="299" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">4 Translate</text>
+    <text x="570" y="318" text-anchor="middle" font-size="14" fill="#475569">delta → NETCONF / gNMI · per-NOS rules</text>
+    <g fill="none" stroke="#7c3aed" stroke-width="2.75" stroke-linecap="round">
+      <path d="M 570 130 L 570 144" marker-end="url(#fl-v)"/>
+      <path d="M 570 196 L 570 210" marker-end="url(#fl-v)"/>
+      <path d="M 570 262 L 570 276" marker-end="url(#fl-v)"/>
+    </g>
+
+    <!-- device -->
+    <rect x="880" y="115" width="210" height="120" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <text x="985" y="165" text-anchor="middle" font-size="22" font-weight="700" fill="#334155">Device</text>
+    <text x="985" y="192" text-anchor="middle" font-size="15" fill="#64748b">network function</text>
+    <text x="985" y="214" text-anchor="middle" font-size="14" fill="#64748b">speaks YANG</text>
+
+    <!-- arrows -->
+    <g fill="none" stroke-linecap="round" stroke-width="2.75">
+      <path d="M 310 60 L 400 60" stroke="#059669" marker-end="url(#fl-g)"/>
+      <path d="M 310 175 L 400 175" stroke="#d97706" marker-end="url(#fl-a)"/>
+      <path d="M 310 290 L 400 290" stroke="#64748b" marker-end="url(#fl-s)"/>
+      <path d="M 740 175 L 880 175" stroke="#64748b" marker-end="url(#fl-s)"/>
+      <path d="M 985 235 V 350 H 165 V 335" stroke="#ea580c" stroke-dasharray="8 6" marker-end="url(#fl-o)"/>
+    </g>
+    <g font-size="14.5" font-weight="600">
+      <rect x="758" y="118" width="104" height="24" rx="12" fill="#fff" stroke="#e2e8f0"/>
+      <text x="810" y="135" text-anchor="middle" fill="#047857">only the delta</text>
+      <rect x="560" y="338" width="178" height="24" rx="12" fill="#fff7ed" stroke="#fdba74"/>
+      <text x="635" y="355" text-anchor="middle" fill="#c2410c">read back (sync)</text>
+    </g>
+  </svg>
+  <aside class="notes">
+    High-level gain: SDC does not forward your Config. It builds ONE tree per device from three inputs (all intents with their priorities, the device's running config incl. brownfield, the YANG model), validates the WHOLE result, and pushes only the difference to the device.
+    This slide comes right after Priority: recap, do not re-teach it (about 60-90 s). Walk the diagram only: parallel inputs into 1 Merge, 2 Validate, then 3 Diff (what changed versus the device) and 4 Translate (turn the delta into the southbound format). Diff and translate are separate on purpose: the tree is complete before anything is computed or sent. Read-back loop sets up Deviations. No bottom bullets; detail stays in notes.
+    Docs (system-architecture/data-server): candidate tree = deep copy of the synced (running) tree + all intents; same leaf set by several intents: lowest priority NUMBER wins; YANG validation; diff; only then the south-bound Set (confirmed commit with auto-rollback timer).
+    Brownfield: stays in the tree as 'running' with the lowest precedence. No intent owns it, so it is reported as an UNHANDLED deviation; SDC does not remove it.
+    Rollback: the push is a confirmed commit. If the transaction is not confirmed within the timeout, data-server re-runs the previous intent content and the device returns to its prior state.
+    Rejection (say it out loud): a config that fails validation never reaches the device, and the user sees the error on the Config.
+    Discovery (one sentence): a DiscoveryRule finds the device and creates its Target, so you never write one.
+    Translate (one sentence, optional): after diff, only the delta is encoded for NETCONF or gNMI. Roadmap (do not dwell): a further per-NOS layer will shape how updates are packaged, e.g. one gNMI Set per YANG module with JSON-IETF where the OS requires it instead of one bulk update under /. That is why translate stays its own step, not folded into diff.
+    Kubernetes speaks resources; the device speaks YANG over the driver. No per-vendor CRDs in your cluster.
+    Read-back (sync): subscriptions/polling keep the tree current; mismatch between winner and device = deviation.
+    Backup slide after this one shows the real pods, only open it if asked.
+  </aside>
+</section>
+
+<section data-sec="Architecture" data-who="Markus" data-visibility="hidden">
+  <h2>Backup: what runs where</h2>
+  <div class="cols" style="align-items:center">
+    <div style="flex:1">
+      <svg class="arch-svg" viewBox="20 8 1000 500" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="SDC architecture: pods in sdc-system">
+        <defs>
+          <linearGradient id="arch-bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f8fafc"/><stop offset="100%" stop-color="#eef2ff"/>
+          </linearGradient>
+          <linearGradient id="arch-node-blue" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f0f7ff"/>
+          </linearGradient>
+          <linearGradient id="arch-node-violet" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#f5f3ff"/>
+          </linearGradient>
+          <linearGradient id="arch-node-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#fffbeb"/><stop offset="100%" stop-color="#fef3c7"/>
+          </linearGradient>
+          <linearGradient id="arch-k8s-pill" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#326ce5"/><stop offset="100%" stop-color="#1a56db"/>
+          </linearGradient>
+          <linearGradient id="arch-wire" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#6366f1"/>
+          </linearGradient>
+          <filter id="arch-node-shadow" x="-25%" y="-25%" width="150%" height="150%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1e40af" flood-opacity="0.14"/>
+          </filter>
+          <filter id="arch-paper-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.12"/>
+          </filter>
+          <marker id="arch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#3b82f6"/>
+          </marker>
+          <marker id="arch-arrow-violet" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#7c3aed"/>
+          </marker>
+          <marker id="arch-arrow-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#d97706"/>
+          </marker>
+          <marker id="arch-arrow-slate" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#64748b"/>
+          </marker>
+          <marker id="arch-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#059669"/>
+          </marker>
+          <marker id="arch-arrow-2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto-start-reverse" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#3b82f6"/>
+          </marker>
+          <marker id="arch-arrow-violet-2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto-start-reverse" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#7c3aed"/>
+          </marker>
+        </defs>
+
+        <!-- outside the namespace -->
+        <rect x="40" y="16" width="650" height="50" rx="14" fill="url(#arch-k8s-pill)"/>
+        <text x="365" y="49" text-anchor="middle" fill="#fff" font-size="21" font-weight="700">Kubernetes API</text>
+        <rect x="740" y="16" width="250" height="50" rx="14" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+        <text x="865" y="39" text-anchor="middle" font-size="18" font-weight="700" fill="#92400e">Git (YANG)</text>
+        <text x="865" y="58" text-anchor="middle" font-size="14" fill="#64748b">vendor models</text>
+        <rect x="780" y="452" width="220" height="48" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="890" y="474" text-anchor="middle" font-size="18" font-weight="700" fill="#334155">NF</text>
+        <text x="890" y="492" text-anchor="middle" font-size="14" fill="#64748b">network function</text>
+
+        <!-- namespace frame -->
+        <rect x="24" y="108" width="992" height="326" rx="18" fill="url(#arch-bg)" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 6"/>
+        <text x="44" y="132" font-size="14" font-weight="700" fill="#64748b" letter-spacing=".06em">NAMESPACE  sdc-system</text>
+
+        <!-- pod 1: api-server -->
+        <g filter="url(#arch-node-shadow)">
+          <rect x="40" y="146" width="240" height="238" rx="14" fill="url(#arch-node-blue)" stroke="#93c5fd" stroke-width="2"/>
+        </g>
+        <rect x="40" y="146" width="240" height="40" rx="14" fill="#dbeafe"/>
+        <text x="160" y="172" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">api-server</text>
+        <text x="160" y="240" text-anchor="middle" font-size="19" font-weight="700" fill="#1e3a8a">config-server</text>
+        <text x="160" y="264" text-anchor="middle" font-size="15" fill="#475569">aggregated API</text>
+        <text x="160" y="298" text-anchor="middle" font-size="15" font-family="Consolas, monospace" fill="#334155">config.sdcio.dev</text>
+        <text x="160" y="350" text-anchor="middle" font-size="14" fill="#64748b">own store, not etcd</text>
+
+        <!-- pod 2: controller -->
+        <g filter="url(#arch-node-shadow)">
+          <rect x="300" y="146" width="240" height="238" rx="14" fill="url(#arch-node-violet)" stroke="#c4b5fd" stroke-width="2"/>
+        </g>
+        <rect x="300" y="146" width="240" height="40" rx="14" fill="#ede9fe"/>
+        <text x="420" y="172" text-anchor="middle" font-size="18" font-weight="700" fill="#5b21b6">controller</text>
+        <text x="420" y="240" text-anchor="middle" font-size="17" font-weight="700" fill="#5b21b6">Fleet-level controllers</text>
+        <g font-size="15" text-anchor="middle" fill="#334155">
+          <text x="420" y="274">DiscoveryRule</text>
+          <text x="420" y="298">ConfigSet</text>
+        </g>
+
+        <!-- pod 3: data-server pod -->
+        <g filter="url(#arch-node-shadow)">
+          <rect x="560" y="146" width="440" height="238" rx="14" fill="url(#arch-node-gold)" stroke="#fcd34d" stroke-width="2"/>
+        </g>
+        <rect x="560" y="146" width="440" height="40" rx="14" fill="#fef3c7"/>
+        <text x="780" y="172" text-anchor="middle" font-size="18" font-weight="700" fill="#92400e">data-server pod</text>
+
+        <rect x="574" y="200" width="150" height="170" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+        <text x="649" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#92400e">controller</text>
+        <g font-size="15" text-anchor="middle" fill="#334155">
+          <text x="649" y="262" font-weight="700">Schema</text>
+          <text x="649" y="282" font-size="13" fill="#64748b">downloads YANG</text>
+          <text x="649" y="316">Target</text>
+          <text x="649" y="340">Subscription</text>
+        </g>
+
+        <rect x="770" y="200" width="216" height="170" rx="12" fill="#fff" stroke="#2563eb" stroke-width="2.5"/>
+        <text x="878" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a8a">data-server</text>
+        <g font-size="15" text-anchor="middle" fill="#334155">
+          <text x="878" y="254">validate</text>
+          <text x="878" y="276">push to NF</text>
+          <text x="878" y="298">in-memory tree</text>
+        </g>
+        <rect x="784" y="314" width="188" height="48" rx="8" fill="#f5f3ff" stroke="#c4b5fd"/>
+        <text x="878" y="335" text-anchor="middle" font-size="15" font-weight="700" fill="#5b21b6">schema-server</text>
+        <text x="878" y="353" text-anchor="middle" font-size="12" fill="#64748b">built in, serves YANG</text>
+
+        <!-- connectors -->
+        <g fill="none" stroke-linecap="round" stroke-width="2.75">
+          <path d="M 160 66 L 160 146" stroke="#059669" marker-end="url(#arch-arrow-green)"/>
+          <path d="M 420 66 L 420 146" stroke="#3b82f6" marker-start="url(#arch-arrow-2)" marker-end="url(#arch-arrow-2)"/>
+          <path d="M 640 66 L 640 146" stroke="#3b82f6" marker-start="url(#arch-arrow-2)" marker-end="url(#arch-arrow-2)"/>
+          <path d="M 865 66 L 865 146" stroke="#d97706" stroke-dasharray="8 6" marker-end="url(#arch-arrow-amber)"/>
+          <path d="M 724 285 L 770 285" stroke="#7c3aed" marker-start="url(#arch-arrow-violet-2)" marker-end="url(#arch-arrow-violet-2)"/>
+          <path d="M 160 384 V 404 H 840 V 384" stroke="#7c3aed" marker-end="url(#arch-arrow-violet)"/>
+          <path d="M 420 384 V 404" stroke="#7c3aed"/>
+          <path d="M 890 384 L 890 452" stroke="#64748b" marker-end="url(#arch-arrow-slate)"/>
+        </g>
+
+        <!-- label pills -->
+        <g font-size="14" font-weight="600" fill="#475569">
+          <rect x="174" y="92" width="60" height="22" rx="11" fill="#ecfdf5" stroke="#6ee7b7"/>
+          <text x="204" y="108" text-anchor="middle" fill="#047857">apply</text>
+          <rect x="434" y="82" width="120" height="22" rx="11" fill="#eff6ff" stroke="#93c5fd"/>
+          <text x="494" y="98" text-anchor="middle" fill="#1d4ed8">watch · update</text>
+          <rect x="654" y="82" width="120" height="22" rx="11" fill="#eff6ff" stroke="#93c5fd"/>
+          <text x="714" y="98" text-anchor="middle" fill="#1d4ed8">watch · update</text>
+          <rect x="879" y="82" width="100" height="22" rx="11" fill="#fffbeb" stroke="#fcd34d"/>
+          <text x="929" y="98" text-anchor="middle" fill="#b45309">clone YANG</text>
+          <rect x="400" y="393" width="300" height="22" rx="11" fill="#f5f3ff" stroke="#c4b5fd"/>
+          <text x="550" y="409" text-anchor="middle" fill="#5b21b6">gRPC: running config · blame</text>
+          <rect x="904" y="408" width="106" height="22" rx="11" fill="#fff" stroke="#e2e8f0"/>
+          <text x="957" y="424" text-anchor="middle">NETCONF / gNMI</text>
+        </g>
+
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">
+    Second architecture slide: the same picture as the flow slide, now as real pods. Don't re-walk the five steps; just point at where each box lives.
+    Three workloads in sdc-system: api-server (Deployment), controller (Deployment), data-server pod (StatefulSet, 2 containers).
+    Be precise about roles:
+    - api-server: the config-server, an aggregated API server (config.sdcio.dev: Config, ConfigSet, Target, RunningConfig, Deviation, Blame). Own Badger store on a PVC, not etcd.
+    - controller (Deployment): fleet-level controllers (DiscoveryRule, ConfigSet). No schema handling.
+    - data-server pod: its controller container downloads the YANG from Git (Schema controller) and runs Target / Subscription. The data-server container VALIDATES using the schema, pushes to the NF (NETCONF/gNMI) and keeps the in-memory tree.
+    - schema-server: built into the data-server process, only serves the YANG-based schemas. It does NOT validate on its own.
+    - The api-server and the controller call the data-server over gRPC (running config, blame).
+    Emphasise: validation happens BEFORE anything touches the device.
+    Keep it under 90 seconds.
+  </aside>
+</section>
+
+<!-- ============================================================ 6. DEVIATIONS -->
+<section data-sec="Deviations" data-who="Markus">
+  <h2>When the device disagrees</h2>
+<pre><code data-trim data-noescape>kind: Deviation
+spec:
+  deviations:
+  - path: network/service[name=svc-a]/bandwidth
+    desiredValue: 5000
+    actualValue: 100
+    <span class="dv-line fragment custom" data-fragment-index="1">reason: NOT_APPLIED</span></code></pre>
+  <table class="dv-table">
+    <thead><tr><th>Reason</th><th>Meaning</th><th>SDC does</th></tr></thead>
+    <tbody>
+      <tr class="fragment na" data-fragment-index="1"><td><span class="dv-badge">NOT_APPLIED</span></td><td>intended value is not on the device</td><td><span class="dv-act fix">revertive: re-applies</span><span class="dv-sub">non-revertive: you clear it</span></td></tr>
+      <tr class="fragment ov" data-fragment-index="2"><td><span class="dv-badge">OVERRULED</span></td><td>a higher-priority Config wins</td><td><span class="dv-act">reports only</span></td></tr>
+      <tr class="fragment un" data-fragment-index="3"><td><span class="dv-badge">UNHANDLED</span></td><td>brownfield config, no Config owns it</td><td><span class="dv-act">reports only</span></td></tr>
+    </tbody>
+  </table>
+  <aside class="notes">
+    Trim the YAML to the five lines that matter; the Deviation is owned by its parent Config.
+    Concrete example for each reason:
+    - NOT_APPLIED: someone changed svc-a bandwidth on the device to 100.
+    - OVERRULED: eth0 ipv4 from new-interface vs overlap-config (previous slide).
+    - UNHANDLED: a loopback someone configured by hand.
+    What SDC does (verified in docs):
+    - NOT_APPLIED + revertive: SDC re-applies the Config automatically and the deviation goes away. This is the abstract's "self-healing".
+    - NOT_APPLIED + non-revertive: the deviation is treated as part of the active config; clear it manually with kubectl sdc (deviation --revert).
+    - OVERRULED: reported only; SDC never changes the overriding config.
+    - UNHANDLED: reported only; with no Config CR all brownfield config is one UNHANDLED deviation per target.
+    SDC creates one Deviation per Target and one per Config CR.
+  </aside>
+</section>
+
+<!-- ============================================================ 7. BLAME -->
+<section data-sec="Blame" data-who="Markus">
+  <h2>Where did this value come from?</h2>
+  <p class="small" style="margin:0 0 .1em"><b>running</b> + <b>intended</b> + <b>deviation</b> in one tree, each value tagged with its <b>owner</b></p>
+  <p class="tiny" style="margin:0 0 .4em"><i>Config Blame is to Config apply what Git Blame is to commit.</i></p>
+<pre class="blame" style="font-size:.68em; margin:0"><code data-trim data-noescape>$ kubectl sdc blame --target demo-device
+                 -----  │ 🎯 demo.demo-device
+                 -----  │ └── 📦 network
+                 -----  │     ├── 📦 interface
+                 -----  │     │   ├── 🔑 name=eth0
+   demo.initial-config  │     │   │   ├── 🍃 admin-up -> true
+   demo.overlap-config  │     │   │   └── 🍃 ipv4-address -> 20.20.20.20
+                 -----  │     │   └── 🔑 name=eth1
+    demo.new-interface  │     │       └── 🍃 ipv4-address -> 10.10.10.10
+                 -----  │     └── 📦 service
+                 -----  │         ├── 🔑 name=svc-a
+demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃 bandwidth <span class="hl">-> 100 [~> 5000]</span>
+                 -----  │         └── 🔑 name=svc-c
+               running  │             └── 🍃 bandwidth -> 500</code></pre>
+  <p class="tiny" style="margin:.4em 0 0; color:#334155">Left: <b>owner</b> (<code>namespace.config</code> or <code>running</code> = brownfield) &nbsp;·&nbsp; <span class="hl"><code>-> 100</code></span> actual &nbsp;·&nbsp; <span class="hl"><code>[~> 5000]</code></span> expected &nbsp;·&nbsp; <span class="hl"><code>(*)</code></span> deviation</p>
+  <aside class="notes">
+    What blame IS: a single view that combines the RUNNING config (what is on the device), the INTENDED config (what the Configs want) and the DEVIATIONS (where they differ), as a tree, and tags each leaf with the source of the highest-precedence value (a Config, 'default', or 'running' if no Config owns it). So it answers three questions at once: what is on the device, who put it there, and does it match the intent. That is why a deviated leaf shows 'actual [~> expected]' and a (*) next to its owner. It also shows the other half of the priority story: the OVERRULED leaf (eth0 ipv4) is attributed to the winning Config.
+    The output is a TREE (the config is a tree, blame shows it as one) with the owner in a left column, same layout as the kubectl-sdc README (default format 'tree'; --format xpath gives one line per leaf). The tree below is illustrative and modelled on the README: replace it with real output and RE-CHECK the exact markers (icons, '(*)', '[~> expected]').
+    Crop real output to the interesting subtree and use a big font; filter with e.g. --filter-path "*/service/*" or --filter-deviation to keep it to ~12 lines.
+    Highlight the svc-a line: the SAME deviation as the previous slide, now seen in the tree. Say it out loud.
+    Source column: a Config name (namespace.name), 'default' (schema default), or 'running' (on the device, no Config owns it).
+    Notation: the value after '->' is ALWAYS what is running on the device; the intended value is in the brackets. Since Sept 2025 (sdc-protos commit "BlameTreeElement: Change the rendering of a deviated running") it is '-> actual [~> expected]'; it used to be 'expected [-> actual]'. The commit text was garbled, so CHECK the exact glyph (~> or ->) in real output, and RE-TAKE any old screenshot (also: old screenshot says 'kubectl sdcio', the plugin is 'kubectl sdc').
+    Tips: --filter-deviation shows only deviated leaves; --filter-owner running shows brownfield only; --filter-path "*/interface/*"; filters are ANDed; --format xpath and --interactive exist.
+    Blame shines with SEVERAL intents plus brownfield config. Pitch: audit, troubleshooting, onboarding brownfield devices.
+  </aside>
+</section>
+
+<!-- ============================================================ 8. DEMO -->
+<section data-sec="Demo" data-who="Alexander">
+  <h2>Demo</h2>
+  <ol class="small">
+    <li>Device is up: <code>Target</code> created by discovery</li>
+    <li>Apply two intents with different priorities</li>
+    <li>Who owns what? <code>blame</code></li>
+    <li>Change the device by hand: <code>deviation</code> and self-healing</li>
+  </ol>
+  <aside class="notes">
+    HANDOVER from Markus (end of the blame slide): "Markus showed the pieces; Alexander now shows them working together." Alexander drives the demo; Markus can stay on stage for questions about SDC internals.
+    Show this "what you will see" list first (4 lines), then switch to the terminal. Terminal font >= 24pt. Time-box: 4 minutes.
+    Flow:
+    1. kubectl get target - device is up (created implicitly by discovery rule + profiles); device already has some brownfield config.
+    2. kubectl sdc runningconfig --target T --format xpath | grep interface (starting point, same as the opener; runningconfig has no path filter, so trim with grep)
+    3. kubectl apply two Configs with different priorities (overlapping leaf)
+    4. kubectl sdc blame --target T --filter-path "*/interface/*" (also --filter-owner, --filter-leaf, --filter-deviation; ANDed). Now blame is interesting: leaves owned by different Configs, one overruled, brownfield leaves owned by 'running'.
+    5. On the device, change svc-a bandwidth manually.
+    6. kubectl sdc deviation --target T - drift appears; if revertive it is reverted: show it disappear. Non-revertive: kubectl sdc deviation --target T --revert (or --interactive to pick, or --format resource-yaml to emit a TargetClearDeviation for 'kubectl sdc apply -f').
+    FALLBACK: recorded video ready; switch after 15 seconds of trouble.
+  </aside>
+</section>
+
+<!-- ============================================================ 9. ABSTRACTION -->
+<section data-sec="In production" data-who="Alexander">
+  <h2>From high-level intent to device config</h2>
+  <svg class="refine-svg" viewBox="0 0 1180 470" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="One high-level intent is refined step by step into many vendor-specific Config CRs, which SDC applies">
+    <defs>
+      <symbol id="gear" viewBox="-26 -26 52 52">
+        <circle r="20" fill="none" stroke="#3b82f6" stroke-width="7" stroke-dasharray="5.2 5.1"/>
+        <circle r="15" fill="#fff" stroke="#3b82f6" stroke-width="5"/>
+        <circle r="6.5" fill="#fff" stroke="#3b82f6" stroke-width="4.5"/>
+      </symbol>
+      <marker id="refine-arrow" markerWidth="9" markerHeight="8" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+        <path d="M0,0 L9,4 L0,8 z" fill="#111827"/>
+      </marker>
+    </defs>
+
+    <!-- column separators -->
+    <g stroke="#3b82f6" stroke-width="2" stroke-dasharray="7 6" fill="none">
+      <path d="M 175 20 V 450"/><path d="M 350 20 V 450"/><path d="M 530 20 V 450"/>
+      <path d="M 690 20 V 450"/><path d="M 860 20 V 450"/><path d="M 995 20 V 450"/>
+    </g>
+
+    <!-- column headers -->
+    <g font-size="20" font-weight="700" fill="#1e293b" text-anchor="middle">
+      <text x="88" y="46">High-level</text><text x="88" y="70">intent</text>
+      <text x="262" y="46">First-level</text><text x="262" y="70">abstraction</text>
+      <text x="440" y="46">Second-level</text><text x="440" y="70">abstraction</text>
+      <text x="610" y="58" font-size="26" letter-spacing="4">•••</text>
+      <text x="775" y="46">n-th level</text><text x="775" y="70">abstraction</text>
+      <text x="928" y="46">Vendor</text><text x="928" y="70">Config CRs</text>
+      <text x="1088" y="46">SDC</text><text x="1088" y="70">apply</text>
+    </g>
+
+    <!-- intent document -->
+    <g>
+      <rect x="58" y="222" width="60" height="78" rx="10" fill="#fff" stroke="#0f0a3c" stroke-width="7"/>
+      <path d="M 73 252 H 103 M 73 270 H 103" stroke="#0f0a3c" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <!-- arrows -->
+    <g stroke="#111827" stroke-width="3.2" fill="none" stroke-linecap="round" marker-end="url(#refine-arrow)">
+      <path d="M 128 261 H 222" marker-end="url(#refine-arrow)"/>
+      <path d="M 292 261 L 395 187" marker-end="url(#refine-arrow)"/>
+      <path d="M 292 261 L 395 335" marker-end="url(#refine-arrow)"/>
+      <path d="M 805 135 L 888 95" marker-end="url(#refine-arrow)"/>
+      <path d="M 805 135 L 888 175" marker-end="url(#refine-arrow)"/>
+      <path d="M 805 225 L 888 255" marker-end="url(#refine-arrow)"/>
+      <path d="M 805 315 L 888 340" marker-end="url(#refine-arrow)"/>
+      <path d="M 805 400 L 888 425" marker-end="url(#refine-arrow)"/>
+    </g>
+
+    <!-- gears: 1 -> 2 -> ... -> 4 -> 5 (more and more detail) -->
+    <g>
+      <use href="#gear" x="234" y="235" width="52" height="52"/>
+      <use href="#gear" x="414" y="154" width="52" height="52"/>
+      <use href="#gear" x="414" y="314" width="52" height="52"/>
+      <use href="#gear" x="749" y="109" width="52" height="52"/>
+      <use href="#gear" x="749" y="199" width="52" height="52"/>
+      <use href="#gear" x="749" y="289" width="52" height="52"/>
+      <use href="#gear" x="749" y="374" width="52" height="52"/>
+      <use href="#gear" x="902" y="69" width="52" height="52"/>
+      <use href="#gear" x="902" y="149" width="52" height="52"/>
+      <use href="#gear" x="902" y="229" width="52" height="52"/>
+      <use href="#gear" x="902" y="314" width="52" height="52"/>
+      <use href="#gear" x="902" y="399" width="52" height="52"/>
+    </g>
+
+    <!-- "and so on" dots -->
+    <g fill="#3b82f6">
+      <circle cx="585" cy="205" r="5"/><circle cx="606" cy="185" r="5"/>
+      <circle cx="585" cy="270" r="5"/><circle cx="606" cy="250" r="5"/>
+      <circle cx="585" cy="345" r="5"/><circle cx="606" cy="325" r="5"/>
+    </g>
+
+    <!-- funnel into SDC -->
+    <polygon points="1005,75 1005,445 1050,260" fill="#a3a3a3"/>
+    <image href="assets/logos/SDC-logo.svg" x="1048" y="205" width="84" height="103"/>
+  </svg>
+  <aside class="notes">
+    Alexander takes over again after the demo. Bridge back to Swisscom: how a high-level request becomes 5000 parameters on 14 NFs. The high-level intent is refined layer by layer; the last layer produces vendor/release-specific Config CRs, and SDC applies, validates and reconciles them.
+    Use one real example from the Swisscom use case if available (e.g. a new slice/DNN fanning out to several CNFs; ConfigSet for the fleet-wide part).
+  </aside>
+</section>
+
+<!-- ============================================================ 10. BENEFITS -->
+<section data-sec="In production" data-who="Alexander">
+  <h2>What this gets you</h2>
+  <ul>
+    <li class="fragment"><b>Less toil</b>: describe intent, not commands</li>
+    <li class="fragment"><b>Reliability</b>: drift detected and corrected</li>
+    <li class="fragment"><b>Visibility</b>: running state, deviations, provenance</li>
+    <li class="fragment"><b>Scale</b>: composition by priority and ConfigSets, not copy/paste</li>
+  </ul>
+  <aside class="notes">
+    TODO before the talk: replace each bullet with a measured Swisscom result (rollout time, drift caught, onboarding time). Without numbers, tie each claim to something the audience just saw in the demo.
+  </aside>
+</section>
+
+<!-- ============================================================ TAKE-AWAYS -->
+<section data-sec="Wrap-up" data-who="Alexander">
+  <h2>Take-aways</h2>
+  <ol class="steps tk">
+    <li class="fragment"><span class="step">1</span><b>Network function configuration can be a Kubernetes resource</b><span class="sub">YANG is the bridge between the network world and the Kubernetes world</span></li>
+    <li class="fragment"><span class="step">2</span><b>Intent + control loop = validated, reconciled, observable</b><span class="sub">schema validation up front, deviations and blame afterwards</span></li>
+    <li class="fragment"><span class="step">3</span><b>Open source and vendor agnostic: try it today</b><span class="sub">SDC is a CNCF Sandbox project, give it your YANG models</span></li>
+  </ol>
+  <aside class="notes">
+    Three sentences the audience should walk out with. Tie each one back to a slide: 1 = the network function vs. kubectl gap (problem section, "Joining the Worlds"); 2 = priority, deviations, blame and the demo; 3 = next slide.
+    This slide is also the natural place to cut or extend when the talk gets a shorter or longer time slot.
+  </aside>
+</section>
+
+<!-- ============================================================ 11. TRY IT -->
+<section data-sec="Wrap-up" data-who="Alexander">
+  <h2>Try it</h2>
+  <div class="cols" style="align-items:center">
+    <div style="flex:1.4">
+      <p style="font-size:1.3em; margin:0 0 .3em"><b>docs.sdcio.dev</b></p>
+      <ul class="small">
+        <li>Quick start &amp; lab</li>
+        <li>GitHub: <code>sdcio</code></li>
+        <li>Discord for news and questions</li>
+        <li>Community meetup, Mondays 08:30 CET</li>
+      </ul>
+      <p class="tiny" style="margin-top:1em">Alexander North &middot; <a href="mailto:alexander.north1@swisscom.com">alexander.north1@swisscom.com</a><br>Markus Vahlenkamp &middot; <a href="mailto:markus.vahlenkamp@nokia.com">markus.vahlenkamp@nokia.com</a></p>
+    </div>
+    <div style="flex:1" class="center">
+      <div class="qr-badge">
+        <img src="assets/qr-docs-sdcio-dev.svg" alt="QR code: https://docs.sdcio.dev">
+        <div class="qr-label">docs</div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    Call to action, not just "Questions?".
+    Prepare backup answers: how is SDC different from Nephio / Crossplane / NSO / Ansible? Brownfield onboarding? Scale of the in-memory tree? Secrets handling? Vendor YANG quirks?
+  </aside>
+</section>
+
+</div>
+</div>
+
+<script src="reveal/reveal.js"></script>
+<script src="reveal/plugin/notes/notes.js"></script>
+<script>
+  // 1. Put the slide header (logo, section marker, venue) into every slide, so it scales with the
+  //    1280x720 canvas and also appears in the PDF export. Section name + speaker come from
+  //    data-sec / data-who on each <section>.
+  (function () {
+    var tpl = document.getElementById('chrome-tpl');
+    document.querySelectorAll('.reveal .slides > section').forEach(function (s) {
+      var h = tpl.content.firstElementChild.cloneNode(true);
+      var sec = s.getAttribute('data-sec');
+      if (sec) {
+        var chip = h.querySelector('.deck-section');
+        chip.hidden = false;
+        chip.querySelector('.what').textContent = sec;
+        chip.querySelector('.who').textContent = s.getAttribute('data-who') || '';
+      }
+      s.insertBefore(h, s.firstChild);
+    });
+  })();
+
+  // 2. Reveal
+  Reveal.initialize({
+    mouseWheel: false,          // an accidental wheel / trackpad scroll must not skip slides on stage
+    hash: true,
+    slideNumber: 'c/t',
+    showSlideNumber: 'all',
+    width: 1280, height: 720,
+    margin: 0.04,
+    center: false,              // slides are top-aligned below the header: stable title position, no jumping
+    transition: 'fade',
+    transitionSpeed: 'fast',
+    controls: true,
+    controlsTutorial: false,
+    progress: true,
+    pdfSeparateFragments: false,
+    pdfMaxPagesPerSlide: 1,
+    plugins: [ typeof RevealNotes !== 'undefined' ? RevealNotes : null ].filter(Boolean)
+  });
+
+  // Mouse wheel only in the overview (ESC): scrolls left / right through the slides.
+  // On stage it stays disabled, so an accidental scroll cannot skip a slide.
+  var wheelLock = 0;
+  document.addEventListener('wheel', function (e) {
+    if (!Reveal.isOverview()) return;
+    e.preventDefault();
+    var now = Date.now();
+    if (now - wheelLock < 120) return;
+    var d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (Math.abs(d) < 4) return;
+    wheelLock = now;
+    if (d > 0) Reveal.right(); else Reveal.left();
+  }, { passive: false });
+</script>
+</body>
+</html>
