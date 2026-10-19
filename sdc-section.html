@@ -77,10 +77,6 @@
   ol.steps { list-style:none; padding:0; margin:0; font-size:.78em; }
   ol.steps li { margin:.5em 0; line-height:1.25; }
 
-  ol.steps.tk { font-size: 1.05em; }
-  ol.steps.tk li { margin: 1.1em 0; padding-left: 0; }
-  .tk .step { font-size: .9em; }
-  .tk .sub { display: block; margin: .15em 0 0 2.4em; font-size: .68em; font-weight: 400; color: var(--grey); }
   .reveal a { color: var(--blue); }
   .in  { color: var(--blue); font-weight:700; }
   .out { color: var(--green); font-weight:700; }
@@ -296,6 +292,22 @@
   .krm-foot { text-align: center; margin-top: 1em; font-size: .82em; color: #334155; }
   .krm-foot b { color: var(--blue); }
 
+  /* open-source ecosystem (SDC + kubectl plugin + sdc-lite) */
+  .eco-row { display: flex; align-items: stretch; justify-content: center; gap: .55em; margin-top: .45em; }
+  .eco-card {
+    flex: 1; max-width: 32%; border-radius: 16px; border: 2px solid #c9d6f5; border-top-width: 6px;
+    background: #fff; padding: .55em .65em .6em; text-align: center;
+  }
+  .eco-card.c-hub { border-top-color: #1a56db; background: linear-gradient(180deg, #f4f7ff 0%, #fff 42%); }
+  .eco-card.c-cli { border-top-color: #5b3fc0; }
+  .eco-card.c-lite { border-top-color: #059669; }
+  .eco-card h3 { font-size: .88em; margin: 0 0 .25em; color: #0f172a; font-weight: 700; }
+  .eco-card p { font-size: .62em; color: #475569; margin: 0; line-height: 1.32; min-height: 3.2em; }
+  .eco-card .chips { justify-content: center; margin-top: .45em; }
+  .eco-card .chip { font-size: .58em; }
+  .eco-repo { display: block; margin-top: .5em; font-family: var(--font-mono); font-size: .52em; color: #64748b; line-height: 1.25; word-break: break-all; }
+  .eco-foot { text-align: center; margin-top: .75em; color: #334155; }
+
   /* operators slide */
   .op-wrap { display: flex; align-items: center; gap: 1.1em; margin-top: .2em; }
   .op-copy { flex: 0 0 47%; }
@@ -429,7 +441,7 @@
     </div>
   </div>
   <aside class="notes">
-    Welcome. Joint session. Alexander: the problem and the building blocks (Kubernetes resources, operators, protocols, YANG). Markus: SDC, from "Joining the Worlds" up to the end of the blame slide. Alexander again: demo, from intent to device config, results, take-aways.
+    Welcome. Joint session. Alexander: the problem and the building blocks (Kubernetes resources, operators, protocols, YANG). Markus: SDC, from "Joining the Worlds" through intent, deviations, blame, the resource-map capstone, and the ecosystem slide. Alexander again: demo, from intent to device config, results, benefits, try it.
     Thesis in one breath: Kubernetes already runs our network functions; their configuration is the part that is still imperative. That is what the next 25 minutes are about.
     The presenters are introduced right here (name, role, company); no separate speaker slide. Contact details are on the last slide.
     Keep this slide up while people settle.
@@ -880,96 +892,11 @@ $ ssh -s upf netconf       # the config
     ~20 seconds, no more. Use the same icons/colours as Alexander's control-loop and YANG slides so the two parts visibly connect.
     One breath of facts: vendor agnostic (no vendor-specific code: you give it the YANG models), (x)NF = PNF, CNF or VNF.
     YANG is the hard requirement; the protocol is a pluggable driver. Today NETCONF and gNMI (chosen per target via the connection profile). The data-server's drivers all implement the same small Target interface (Get, Set, AddSyncs, Status, Close), so another protocol such as RESTCONF is "just" another driver - say it as a possibility, not a promise. Initiated by Nokia, open source since 2024, CNCF Sandbox since 2026.
-    Then: "What does that look like in practice?" -> next slide.
+    Then: dive into how configuration works—start with the Config CR ("same kubectl / GitOps workflow as Alexander showed; we zoom out to the full resource map after deviations and blame").
   </aside>
 </section>
 
-<!-- ============================================================ 2. OPENER -->
-<section data-sec="SDC" data-who="Markus">
-  <h2><code>kubectl</code>, now for network functions</h2>
-<pre style="font-size:.74em"><code class="language-bash" data-trim data-noescape>$ kubectl apply -f new-interface.yaml
-config.sdcio.dev/new-interface created
-
-$ kubectl sdc runningconfig --target leaf-1 --format xpath
-...
-/network/interface[name=eth1]/admin-up: true
-/network/interface[name=eth1]/ipv4-address: 10.10.10.10
-/network/interface[name=eth1]/speed: 10G
-...</code></pre>
-  <p class="small">Same workflow for a deployment, a database, <b>and</b> a 5G core or any other network function.</p>
-  <aside class="notes">
-    The previous slide placed SDC between the two worlds; this one shows what that means in practice. Lead with the gap from Alexander's part (everything around the network function is declarative, its configuration was not), then: "with SDC it is". Pause, then show the commands.
-    This is the target picture for the whole talk: the same kubectl workflow as for a Deployment, now for network function configuration.
-    Point at it: a Kubernetes object, applied with kubectl, and the device's REAL running config read back through the same tooling, as xpath lines. "That is what SDC does. Let me show how."
-    Why runningconfig and not blame here: the opener proves 'apply -> it is on the device'. Blame needs a story (several intents, brownfield), so it comes later.
-    CLI facts (kubectl-sdc README): the plugin is 'kubectl sdc' (NOT 'kubectl sdcio'). runningconfig takes --target and --format (json, json_ietf, xml, xpath, yaml; default yaml). It has NO path filter, so it prints everything: the '...' mark that the output is trimmed (say "trimmed", or pipe through grep in the demo).
-    Config API group is config.sdcio.dev, so the 'created' line is right. Output is illustrative: replace with real demo output (same target name as in the demo), ~6 lines. Consider a CNF-flavoured example (UPF/SMF parameter) instead of leaf-1/eth1.
-    Say you will come back to this exact flow in the demo.
-  </aside>
-</section>
-
-<!-- ============================================================ 4. RESOURCES -->
-<section data-sec="Resources" data-who="Markus">
-  <h2>What you write, what you get back</h2>
-  <div class="rs-steps">
-    <div class="rs-step fragment" data-fragment-index="1">
-      <span class="rs-n in">1</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>You write</b> the infrastructure <span class="rs-api">inv.sdcio.dev</span></div>
-        <div class="chips"><span class="chip in">DiscoveryRule</span><span class="chip in">TargetConnectionProfile</span><span class="chip in">TargetSyncProfile</span><span class="chip in">Secret</span></div>
-        <div class="chips" style="margin-top:.45em; padding-top:.4em; border-top:1px dashed #c9d6f5; align-items:center"><span class="chip in">Schema</span><span style="font-size:.6em; color:#64748b">the YANG models to use, from Git</span></div>
-      </div>
-    </div>
-    <div class="rs-step fragment" data-fragment-index="2">
-      <span class="rs-n out">2</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>SDC derives</b> one device per discovery <span class="rs-api">config.sdcio.dev</span></div>
-        <div class="chips"><span class="chip out">Target</span></div>
-      </div>
-    </div>
-    <div class="rs-step fragment" data-fragment-index="3">
-      <span class="rs-n in">3</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>You write</b> the intent, applied to the Target <span class="rs-api">config.sdcio.dev</span></div>
-        <div class="chips"><span class="chip in">Config</span><span class="chip in">ConfigSet</span></div>
-      </div>
-    </div>
-    <div class="rs-step fragment" data-fragment-index="4">
-      <span class="rs-n out">4</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>SDC reads back</b> what the device really has, brownfield included <span class="rs-api">config.sdcio.dev</span></div>
-        <div class="chips"><span class="chip out">RunningConfig</span><span class="chip out">Deviation</span><span class="chip out">ConfigBlame</span></div>
-      </div>
-    </div>
-  </div>
-  <aside class="notes">
-    Researched against docs.sdcio.dev (config-server, target, discovery, config, configset, deviation). API is v1alpha1: re-check before the talk.
-
-    TWO API GROUPS (one sentence):
-    - inv.sdcio.dev (plain CRDs, etcd): Schema, DiscoveryRule, TargetConnectionProfile, TargetSyncProfile, plus Subscription (not on the slide).
-    - config.sdcio.dev (aggregated API server, Badger store, NOT etcd): Target, Config, ConfigSet, Deviation, RunningConfig, ConfigBlame. Why not etcd: a Config can hold a whole device config, megabytes, over etcd's ~1.5 MB object limit.
-
-    YOU WRITE:
-    - Schema: YANG provider + version (e.g. srl.nokia.sdcio.dev 24.10.1), from Git.
-    - DiscoveryRule: scans addresses/prefixes periodically, creates Targets. Provider/version via defaultSchema or detected via DiscoveryVendorProfile(s). Attaches connection profile, sync profile, credentials.
-    - TargetConnectionProfile: protocol (gNMI/NETCONF), port, encoding, NETCONF version, commit candidate, insecure/skipVerify.
-    - TargetSyncProfile: how SDC keeps its view of the device current: syncs with protocol, paths, mode (gNMI get/once/sample/on-change; NETCONF polls), interval. Feeds RunningConfig and deviation detection.
-    - Credentials: a Kubernetes Secret.
-    - Config: intent for ONE target (labels config.sdcio.dev/targetName and targetNamespace). path/value snippets, priority, lifecycle.deletionPolicy, revertive.
-    - ConfigSet: template with a targetSelector; creates/updates one Config per matching target and deletes the ones that no longer match. Ideal for fleet-wide settings and the 14-NF Swisscom case.
-
-    SDC DERIVES (created or computed by SDC, read-only for you):
-    - Target: normally created by the DiscoveryRule controller, not by the user (docs: "not explicitly created by an end user"). Say "documented way", not "impossible".
-    - RunningConfig: live device state via sync.
-    - Deviation: one per Target and one per Config CR. With no Config CR, ALL brownfield config is one UNHANDLED deviation per target.
-    - ConfigBlame: per-path ownership.
-    There is NO "UnManagedConfig" resource. Do not mention it.
-
-    The point that you don't write a Target (DiscoveryRule + connection profile + sync profile + schema produce it) is NOT on the slide any more: you have already said it earlier (e.g. while explaining the architecture / discovery). The table shows it implicitly: Target sits in the 'SDC derives' column. If you did not cover it earlier, say it once when the Device row appears.
-  </aside>
-</section>
-
-<!-- ============================================================ 5. INTENTS -->
+<!-- ============================================================ 2. INTENTS -->
 <section data-sec="Intents" data-who="Markus">
   <h2>Configuration as intent</h2>
   <div class="cols">
@@ -1002,7 +929,9 @@ spec:
     </div>
   </div>
   <aside class="notes">
+    Bridge from handover: SDC discovers each device and creates a Target CR—you do not apply a Target yourself. Your Config only points at it via the targetName label (demo-device in the deck).
     Key idea: you do NOT write the whole device config. Each Config is a snippet, so different teams/systems own different parts. That is why we need priority on the next slide.
+    Same workflow as a Deployment: kubectl apply or GitOps on this YAML (config.sdcio.dev). We name the rest of the CRDs after you have seen merge, drift, and blame.
     Fragments colour-match the code. apiVersion/namespace left out to fit; show the full YAML as backup or in the demo.
   </aside>
 </section>
@@ -1383,6 +1312,105 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
     Notation: the value after '->' is ALWAYS what is running on the device; the intended value is in the brackets. Since Sept 2025 (sdc-protos commit "BlameTreeElement: Change the rendering of a deviated running") it is '-> actual [~> expected]'; it used to be 'expected [-> actual]'. The commit text was garbled, so CHECK the exact glyph (~> or ->) in real output, and RE-TAKE any old screenshot (also: old screenshot says 'kubectl sdcio', the plugin is 'kubectl sdc').
     Tips: --filter-deviation shows only deviated leaves; --filter-owner running shows brownfield only; --filter-path "*/interface/*"; filters are ANDed; --format xpath and --interactive exist.
     Blame shines with SEVERAL intents plus brownfield config. Pitch: audit, troubleshooting, onboarding brownfield devices.
+    Transition to the next slide: "Now zoom out—here is the full Kubernetes surface for everything we just walked through."
+  </aside>
+</section>
+
+<!-- ============================================================ RESOURCES (capstone) -->
+<section data-sec="Resources" data-who="Markus">
+  <h2>What you write, what you get back</h2>
+  <div class="rs-steps">
+    <div class="rs-step fragment" data-fragment-index="1">
+      <span class="rs-n in">1</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>You write</b> the infrastructure <span class="rs-api">inv.sdcio.dev</span></div>
+        <div class="chips"><span class="chip in">DiscoveryRule</span><span class="chip in">TargetConnectionProfile</span><span class="chip in">TargetSyncProfile</span><span class="chip in">Secret</span></div>
+        <div class="chips" style="margin-top:.45em; padding-top:.4em; border-top:1px dashed #c9d6f5; align-items:center"><span class="chip in">Schema</span><span style="font-size:.6em; color:#64748b">the YANG models to use, from Git</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="2">
+      <span class="rs-n out">2</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>SDC derives</b> one device per discovery <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip out">Target</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="3">
+      <span class="rs-n in">3</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>You write</b> the intent, applied to the Target <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip in">Config</span><span class="chip in">ConfigSet</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="4">
+      <span class="rs-n out">4</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>SDC reads back</b> what the device really has, brownfield included <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip out">RunningConfig</span><span class="chip out">Deviation</span><span class="chip out">ConfigBlame</span></div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    CAPSTONE, not opener: the audience already knows Config, priority, the intent pipeline, deviations, and blame. This slide maps those ideas onto CRDs and API groups—do not re-teach merge or NOT_APPLIED.
+    Researched against docs.sdcio.dev (config-server, target, discovery, config, configset, deviation). API is v1alpha1: re-check before the talk.
+
+    TWO API GROUPS (one sentence):
+    - inv.sdcio.dev (plain CRDs, etcd): Schema, DiscoveryRule, TargetConnectionProfile, TargetSyncProfile, plus Subscription (not on the slide).
+    - config.sdcio.dev (aggregated API server, Badger store, NOT etcd): Target, Config, ConfigSet, Deviation, RunningConfig, ConfigBlame. Why not etcd: a Config can hold a whole device config, megabytes, over etcd's ~1.5 MB object limit.
+
+    YOU WRITE:
+    - Schema: YANG provider + version (e.g. srl.nokia.sdcio.dev 24.10.1), from Git.
+    - DiscoveryRule: scans addresses/prefixes periodically, creates Targets. Provider/version via defaultSchema or detected via DiscoveryVendorProfile(s). Attaches connection profile, sync profile, credentials.
+    - TargetConnectionProfile: protocol (gNMI/NETCONF), port, encoding, NETCONF version, commit candidate, insecure/skipVerify.
+    - TargetSyncProfile: how SDC keeps its view of the device current: syncs with protocol, paths, mode (gNMI get/once/sample/on-change; NETCONF polls), interval. Feeds RunningConfig and deviation detection.
+    - Credentials: a Kubernetes Secret.
+    - Config: intent for ONE target (labels config.sdcio.dev/targetName and targetNamespace). path/value snippets, priority, lifecycle.deletionPolicy, revertive.
+    - ConfigSet: template with a targetSelector; creates/updates one Config per matching target and deletes the ones that no longer match. Ideal for fleet-wide settings and the 14-NF Swisscom case.
+
+    SDC DERIVES (created or computed by SDC, read-only for you):
+    - Target: normally created by the DiscoveryRule controller, not by the user (docs: "not explicitly created by an end user"). Say "documented way", not "impossible".
+    - RunningConfig: live device state via sync—the input to diff on the intent journey slide.
+    - Deviation: one per Target and one per Config CR. With no Config CR, ALL brownfield config is one UNHANDLED deviation per target.
+    - ConfigBlame: per-path ownership—the tree view you just saw.
+    There is NO "UnManagedConfig" resource. Do not mention it.
+
+    Step 4 is observability, not a fifth apply step: sync keeps RunningConfig current; mismatches surface as Deviation; blame is the human-friendly view. kubectl sdc is the usual way to work with that read-back (next slide).
+    Transition: "Those CRDs are the SDC platform; around it there are two more open-source tools operators actually use."
+    ~90 seconds unless Q&A; then ecosystem.
+  </aside>
+</section>
+
+<!-- ============================================================ ECOSYSTEM -->
+<section data-sec="Ecosystem" data-who="Markus">
+  <h2>The SDC ecosystem</h2>
+  <div class="eco-row">
+    <div class="eco-card c-hub fragment" data-fragment-index="1">
+      <h3>SDC</h3>
+      <p>Runs <b>in the cluster</b>: discovery, intent merge, validation, southbound drivers, sync.</p>
+      <span class="eco-repo">github.com/sdcio/sdc</span>
+    </div>
+    <div class="eco-card c-cli fragment" data-fragment-index="2">
+      <h3><code>kubectl sdc</code></h3>
+      <p><b>Kubectl plugin</b> for the SDC API — inspect what is really on the device, who owns each leaf, and handle drift; same context and RBAC as always.</p>
+      <span class="eco-repo">github.com/sdcio/kubectl-sdc</span>
+    </div>
+    <div class="eco-card c-lite fragment" data-fragment-index="3">
+      <h3>sdc-lite</h3>
+      <p><b>Local CLI</b> — YANG schemas and configs on your machine or in CI, no cluster required.</p>
+      <div class="chips"><span class="chip">validate</span><span class="chip">diff</span><span class="chip">blame</span><span class="chip">convert</span></div>
+      <span class="eco-repo">github.com/sdcio/sdc-lite</span>
+    </div>
+  </div>
+  <p class="eco-foot small fragment" data-fragment-index="4">Install: release binaries or <code>install.sh</code> on each repo &nbsp;·&nbsp; docs: <b>docs.sdcio.dev</b></p>
+  <aside class="notes">
+    Three repos under github.com/sdcio — all open source (Nokia-initiated, CNCF Sandbox). This slide names the split; do not re-teach Config or deviations.
+    SDC (github.com/sdcio/sdc): the platform you have been describing — inventory CRDs, config-server, data-server, controllers. That is what runs when you helm/kustomize install SDC.
+    kubectl-sdc (github.com/sdcio/kubectl-sdc): binary kubectl-sdc, command kubectl sdc (not sdcio). Same kubeconfig/namespace/RBAC. Big picture for the room: SDC exposes resources through the Kubernetes API; kubectl get/yaml is enough for CR manifests, but operators live in subresources and plugin commands — synced running config (several output formats), blame tree, deviation list and manual revert when auto-heal does not apply. README lists blame, runningconfig, deviation, apply. Pick one example if someone asks; demo uses blame + deviation.
+    sdc-lite (github.com/sdcio/sdc-lite): local/CI YANG toolkit — validate, diff, convert, pipeline; no cluster. Complements SDC, does not replace the plugin.
+    One-liner split: cluster + devices = SDC; day-2 on that API = kubectl sdc; laptop/CI = sdc-lite.
+    Optional one-liners if asked: curl install scripts on each repo; go install paths in READMEs.
+    Hand over to Alexander: "We will use kubectl sdc in the demo; sdc-lite is there when you do not have a lab handy."
+    ~60–75 seconds.
   </aside>
 </section>
 
@@ -1396,11 +1424,11 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
     <li>Change the device by hand: <code>deviation</code> and self-healing</li>
   </ol>
   <aside class="notes">
-    HANDOVER from Markus (end of the blame slide): "Markus showed the pieces; Alexander now shows them working together." Alexander drives the demo; Markus can stay on stage for questions about SDC internals.
+    HANDOVER from Markus (end of the ecosystem slide): "Markus mapped the CRDs and the tooling around them; Alexander now shows kubectl sdc on a live cluster." Alexander drives the demo; Markus can stay on stage for questions about SDC internals.
     Show this "what you will see" list first (4 lines), then switch to the terminal. Terminal font >= 24pt. Time-box: 4 minutes.
     Flow:
     1. kubectl get target - device is up (created implicitly by discovery rule + profiles); device already has some brownfield config.
-    2. kubectl sdc runningconfig --target T --format xpath | grep interface (starting point, same as the opener; runningconfig has no path filter, so trim with grep)
+    2. kubectl sdc runningconfig --target T --format xpath | grep interface (baseline on the device; runningconfig has no path filter, so trim with grep)
     3. kubectl apply two Configs with different priorities (overlapping leaf)
     4. kubectl sdc blame --target T --filter-path "*/interface/*" (also --filter-owner, --filter-leaf, --filter-deviation; ANDed). Now blame is interesting: leaves owned by different Configs, one overruled, brownfield leaves owned by 'running'.
     5. On the device, change svc-a bandwidth manually.
@@ -1506,20 +1534,6 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
   </aside>
 </section>
 
-<!-- ============================================================ TAKE-AWAYS -->
-<section data-sec="Wrap-up" data-who="Alexander">
-  <h2>Take-aways</h2>
-  <ol class="steps tk">
-    <li class="fragment"><span class="step">1</span><b>Network function configuration can be a Kubernetes resource</b><span class="sub">YANG is the bridge between the network world and the Kubernetes world</span></li>
-    <li class="fragment"><span class="step">2</span><b>Intent + control loop = validated, reconciled, observable</b><span class="sub">schema validation up front, deviations and blame afterwards</span></li>
-    <li class="fragment"><span class="step">3</span><b>Open source and vendor agnostic: try it today</b><span class="sub">SDC is a CNCF Sandbox project, give it your YANG models</span></li>
-  </ol>
-  <aside class="notes">
-    Three sentences the audience should walk out with. Tie each one back to a slide: 1 = the network function vs. kubectl gap (problem section, "Joining the Worlds"); 2 = priority, deviations, blame and the demo; 3 = next slide.
-    This slide is also the natural place to cut or extend when the talk gets a shorter or longer time slot.
-  </aside>
-</section>
-
 <!-- ============================================================ 11. TRY IT -->
 <section data-sec="Wrap-up" data-who="Alexander">
   <h2>Try it</h2>
@@ -1528,7 +1542,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
       <p style="font-size:1.3em; margin:0 0 .3em"><b>docs.sdcio.dev</b></p>
       <ul class="small">
         <li>Quick start &amp; lab</li>
-        <li>GitHub: <code>sdcio</code></li>
+        <li>GitHub: <code>sdcio/sdc</code>, <code>kubectl-sdc</code>, <code>sdc-lite</code></li>
         <li>Discord for news and questions</li>
         <li>Community meetup, Mondays 08:30 CET</li>
       </ul>

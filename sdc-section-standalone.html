@@ -435,6 +435,9 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   .hl   { background: #fff3b0; padding: 0 .2em; border-radius: 4px; }
   .ha, .hb, .hc, .hd, .he { padding: 0 .15em; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
   .reveal pre.blame .hl { padding: 0; }  /* keep monospace columns aligned */
+  /* code highlights that switch on together with their description (fragment) */
+  .reveal .hl-fr.fragment.custom { opacity: 1; visibility: visible; }
+  .reveal .hl-fr.fragment.custom:not(.visible) { background: transparent; }
   .ha { background: #ffe9a8; } .hb { background: #cdeedb; } .hc { background: #d6e4ff; } .hd { background: #f9d6e6; } .he { background: #ddd6fe; }
   /* two worlds + bridge */
   .worlds { display:flex; align-items:center; justify-content:center; gap:0; margin-top:.8em; }
@@ -444,7 +447,16 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   .world .card small { display:block; font-weight:400; font-size:.62em; color:var(--grey); }
   .bridge { display:flex; flex-direction:column; align-items:center; width:32%; }
   .bridge .sdc { background:var(--blue); color:#fff; font-weight:700; font-size:1.5em; border-radius:50px; padding:.15em 1.1em; margin:.15em 0; box-shadow:0 4px 14px rgba(26,86,219,.35); }
-  .bridge .line { font-size:.6em; color:var(--grey); width:100%; text-align:center; padding:.2em 0; border-top:4px solid var(--blue); }
+  .reveal .bridge img.sdc-logo { height: 3.6em; width: auto; max-height: none; margin: .25em 0; border: 0; box-shadow: none; background: none; }
+  .bridge { position:relative; }
+  .bridge .line { position:relative; font-size:.6em; color:var(--grey); width:100%; text-align:center; padding:.35em 0; }
+  .bridge .line.top { border-top:4px solid var(--blue); }
+  .bridge .line.bottom { border-bottom:4px solid var(--blue); }
+  .bridge .line::before, .bridge .line::after { content:""; position:absolute; width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; }
+  .bridge .line::before { left:-3px; border-right:14px solid var(--blue); }
+  .bridge .line::after { right:-3px; border-left:14px solid var(--blue); }
+  .bridge .line.top::before, .bridge .line.top::after { top:-11px; }
+  .bridge .line.bottom::before, .bridge .line.bottom::after { bottom:-11px; }
 
   /* tables */
   .reveal table { font-size: .7em; margin: 0 auto; }
@@ -466,10 +478,6 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   ol.steps { list-style:none; padding:0; margin:0; font-size:.78em; }
   ol.steps li { margin:.5em 0; line-height:1.25; }
 
-  ol.steps.tk { font-size: 1.05em; }
-  ol.steps.tk li { margin: 1.1em 0; padding-left: 0; }
-  .tk .step { font-size: .9em; }
-  .tk .sub { display: block; margin: .15em 0 0 2.4em; font-size: .68em; font-weight: 400; color: var(--grey); }
   .reveal a { color: var(--blue); }
   .in  { color: var(--blue); font-weight:700; }
   .out { color: var(--green); font-weight:700; }
@@ -556,6 +564,31 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   .pz-dev .v { display: grid; justify-items: center; font-family: var(--font-mono); font-weight: 700; font-size: .72em; }
   .pz-dev .v > span { grid-area: 1 / 1; }
   .pz-dev .v .new { color: #fff; background: var(--blue); border-radius: 8px; padding: 0 .3em; }
+  .pz-res2 { text-align: left; font-size: .6em; }
+  .pz-res2 .k { display: block; margin-bottom: .3em; }
+  .pz-res2 .pz-line { display: grid; grid-template-columns: 41ch 14ch auto; column-gap: 1.2em; align-items: baseline; font-family: var(--font-mono); line-height: 1.5; white-space: nowrap; }
+  .pz-res2 .pz-line .p { color: var(--grey); }
+  .pz-res2 .pz-line .v, .pz-res2 .pz-line .t { display: grid; justify-items: start; }
+  .pz-res2 .pz-line .v { font-weight: 700; }
+  .pz-res2 .pz-line .t { font-family: var(--font-ui); font-weight: 400; font-size: .8em; color: var(--grey); }
+  .pz-res2 .pz-line .v > span, .pz-res2 .pz-line .t > span { grid-area: 1 / 1; }
+  .pz-res2 .pz-line .v .new { color: #fff; background: var(--blue); border-radius: 8px; padding: 0 .3em; }
+  .pz-sets { white-space: nowrap; }
+  .pz-stack { display: grid; grid-template-columns: max-content max-content max-content max-content; justify-content: start; gap: .4em 1.2em; }
+  .pz-stack > .pz-card { display: grid; grid-template-columns: subgrid; grid-template-rows: auto auto; grid-column: 1 / -1; column-gap: 1.2em; row-gap: 0; }
+  .pz-stack > .pz-card > .pz-name { grid-column: 1; grid-row: 1 / 3; }
+  .pz-stack > .pz-card > .pz-prio { grid-column: 4; grid-row: 1 / 3; align-self: center; }
+  .pz-stack > .pz-card { position: relative; }
+  .pz-del { position: absolute; inset: 0; background: rgba(255,255,255,.7); pointer-events: none; }
+  .pz-stack > .pz-card:has(.pz-del.visible) :is(.pz-name, .pz-x, .pz-val, .pz-prio) { text-decoration: line-through; text-decoration-color: #dc2626; text-decoration-thickness: 2px; }
+  .pz-x, .pz-val { font-family: var(--font-mono); font-size: .6em; line-height: 1.5; white-space: nowrap; padding: .15em 0; align-self: center; }
+  .pz-x { color: var(--grey); }
+  .pz-val { font-weight: 700; }
+  .pz-name, .pz-who { white-space: nowrap; }
+  .pz-stack > .pz-card { padding: 0 .8em 0 0; overflow: hidden; }
+  .pz-stack > .pz-card > .pz-name { align-self: stretch; display: flex; flex-direction: column; justify-content: center; padding: .4em .9em; background: rgba(26,86,219,.08); border-right: 2px solid #c9d6f5; }
+  .pz-stack > .pz-card > .pz-sets, .pz-stack > .pz-card > .pz-prio { padding: .4em 0; }
+  .pz { max-width: 1040px; }
   .pz-rule { margin-top: .7em; font-size: .72em; line-height: 1.3; }
   .pz-rule b { color: var(--blue); }
 
@@ -659,6 +692,22 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   .krm-arrow { align-self: center; font-size: 1.3em; color: var(--blue); font-weight: 700; }
   .krm-foot { text-align: center; margin-top: 1em; font-size: .82em; color: #334155; }
   .krm-foot b { color: var(--blue); }
+
+  /* open-source ecosystem (SDC + kubectl plugin + sdc-lite) */
+  .eco-row { display: flex; align-items: stretch; justify-content: center; gap: .55em; margin-top: .45em; }
+  .eco-card {
+    flex: 1; max-width: 32%; border-radius: 16px; border: 2px solid #c9d6f5; border-top-width: 6px;
+    background: #fff; padding: .55em .65em .6em; text-align: center;
+  }
+  .eco-card.c-hub { border-top-color: #1a56db; background: linear-gradient(180deg, #f4f7ff 0%, #fff 42%); }
+  .eco-card.c-cli { border-top-color: #5b3fc0; }
+  .eco-card.c-lite { border-top-color: #059669; }
+  .eco-card h3 { font-size: .88em; margin: 0 0 .25em; color: #0f172a; font-weight: 700; }
+  .eco-card p { font-size: .62em; color: #475569; margin: 0; line-height: 1.32; min-height: 3.2em; }
+  .eco-card .chips { justify-content: center; margin-top: .45em; }
+  .eco-card .chip { font-size: .58em; }
+  .eco-repo { display: block; margin-top: .5em; font-family: var(--font-mono); font-size: .52em; color: #64748b; line-height: 1.25; word-break: break-all; }
+  .eco-foot { text-align: center; margin-top: .75em; color: #334155; }
 
   /* operators slide */
   .op-wrap { display: flex; align-items: center; gap: 1.1em; margin-top: .2em; }
@@ -793,7 +842,7 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
     </div>
   </div>
   <aside class="notes">
-    Welcome. Joint session. Alexander: the problem and the building blocks (Kubernetes resources, operators, protocols, YANG). Markus: SDC, from "Joining the Worlds" up to the end of the blame slide. Alexander again: demo, from intent to device config, results, take-aways.
+    Welcome. Joint session. Alexander: the problem and the building blocks (Kubernetes resources, operators, protocols, YANG). Markus: SDC, from "Joining the Worlds" through intent, deviations, blame, the resource-map capstone, and the ecosystem slide. Alexander again: demo, from intent to device config, results, benefits, try it.
     Thesis in one breath: Kubernetes already runs our network functions; their configuration is the part that is still imperative. That is what the next 25 minutes are about.
     The presenters are introduced right here (name, role, company); no separate speaker slide. Contact details are on the last slide.
     Keep this slide up while people settle.
@@ -1208,7 +1257,7 @@ $ ssh -s upf netconf       # the config
 
 <!-- ============================================================ 1. HANDOVER -->
 <section data-sec="SDC" data-who="Markus">
-  <h2>Joining the Worlds</h2>
+  <h2 style="display:grid"><span class="fragment fade-out" data-fragment-index="1" style="grid-area:1/1">Separate Worlds</span><span class="fragment fade-in" data-fragment-index="1" style="grid-area:1/1">Joining the Worlds</span></h2>
   <div class="worlds">
     <div class="world">
       <div class="wtitle">Network world</div>
@@ -1216,9 +1265,10 @@ $ ssh -s upf netconf       # the config
       <div class="card">YANG model<small>its configuration interface</small></div>
     </div>
     <div class="bridge">
-      <div class="line">NETCONF · gNMI</div>
-      <div class="sdc">SDC</div>
-      <div class="line">CRs · control loop</div>
+      <div class="line top"></div>
+      <img class="sdc-logo fragment fade-in" data-fragment-index="1" src="assets/logos/SDC-logo.svg" alt="SDC">
+      <div class="line bottom"></div>
+
     </div>
     <div class="world">
       <div class="wtitle">Kubernetes world</div>
@@ -1226,58 +1276,224 @@ $ ssh -s upf netconf       # the config
       <div class="card">Control loop<small>watch · act · reconcile</small></div>
     </div>
   </div>
-  <p class="center small" style="margin-top:1em">Cloud-native network configuration for anything YANG-modelled</p>
-  <p class="center tiny">Protocols today: NETCONF · gNMI &nbsp;|&nbsp; Open source since 2024 · CNCF Sandbox</p>
+  <p class="center small fragment fade-in" data-fragment-index="1" style="margin-top:1em">Cloud-native network configuration for anything YANG-modelled</p>
+  <div class="center fragment fade-in" data-fragment-index="1">
+    <ul class="tiny" style="display:inline-block; text-align:left; margin:.2em 0 0; padding-left:1.2em; line-height:1.5; list-style:disc">
+      <li>Initiated by Nokia</li>
+      <li>Open source since 2024</li>
+      <li>CNCF Sandbox since 2026</li>
+    </ul>
+  </div>
   <aside class="notes">
+    TITLE: starts as "Separate Worlds" and switches to "Joining the Worlds" on the same click that brings in the logo.
+    BUILD: the slide opens with the two worlds only (the concepts Alexander introduced). The arrows between them are already there: that is the bridge that exists, the gap to be joined. One click: the SDC logo appears on the bridge together with the tagline and the three facts ("that is where SDC enters the stage").
     Picture: two worlds and SDC as the bridge (not an equation: SDC is not the sum of the parts, it is the glue). Left: the network world, where the NF and its YANG model belong together (the YANG model IS the NF's configuration interface, spoken over NETCONF/gNMI). Right: the Kubernetes world: declarative intent as custom resources, and a control loop. SDC sits in the middle: it speaks YANG/NETCONF/gNMI towards the NF and CRs/control loop towards Kubernetes.
-    HANDOVER from Alexander: "Alexander showed that Kubernetes has the control loop and that network functions are configured through YANG models. SDC joins those two worlds."
+    HANDOVER from Alexander: "Alexander introduced the concepts and protocols on both sides: Kubernetes with declarative resources and the control loop, network functions with YANG, NETCONF and gNMI. Now we need to join them, and that is where SDC enters the stage."
     Introduce yourself in one sentence: Markus, Nokia, where SDC was created.
     ~20 seconds, no more. Use the same icons/colours as Alexander's control-loop and YANG slides so the two parts visibly connect.
     One breath of facts: vendor agnostic (no vendor-specific code: you give it the YANG models), (x)NF = PNF, CNF or VNF.
-    YANG is the hard requirement; the protocol is a pluggable driver. Today NETCONF and gNMI (chosen per target via the connection profile). The data-server's drivers all implement the same small Target interface (Get, Set, AddSyncs, Status, Close), so another protocol such as RESTCONF is "just" another driver - say it as a possibility, not a promise. Open source since 2024, CNCF Sandbox.
-    Then: "What does that look like in practice?" -> next slide.
+    YANG is the hard requirement; the protocol is a pluggable driver. Today NETCONF and gNMI (chosen per target via the connection profile). The data-server's drivers all implement the same small Target interface (Get, Set, AddSyncs, Status, Close), so another protocol such as RESTCONF is "just" another driver - say it as a possibility, not a promise. Initiated by Nokia, open source since 2024, CNCF Sandbox since 2026.
+    Then: dive into how configuration works—start with the Config CR ("same kubectl / GitOps workflow as Alexander showed; we zoom out to the full resource map after deviations and blame").
   </aside>
 </section>
 
-<!-- ============================================================ 2. OPENER -->
-<section data-sec="SDC" data-who="Markus">
-  <h2>What if network function config worked like the rest of Kubernetes?</h2>
-<pre style="font-size:.74em"><code class="language-bash" data-trim data-noescape>$ kubectl apply -f new-interface.yaml
-config.sdcio.dev/new-interface created
-
-$ kubectl sdc runningconfig --target leaf-1 --format xpath
-...
-/network/interface[name=eth1]/admin-up: true
-/network/interface[name=eth1]/ipv4-address: 10.10.10.10
-/network/interface[name=eth1]/speed: 10G
-...</code></pre>
-  <p class="small">Same workflow for a deployment, a database, <b>and</b> a 5G core function.</p>
-  <aside class="notes">
-    The previous slide placed SDC between the two worlds; this one shows what that means in practice. Start with the question, which echoes the gap from Alexander's part (everything around the network function is declarative, its configuration is not). Pause, then show the commands.
-    This is the target picture for the whole talk: the same kubectl workflow as for a Deployment, now for network function configuration.
-    Point at it: a Kubernetes object, applied with kubectl, and the device's REAL running config read back through the same tooling, as xpath lines. "That is what SDC does. Let me show how."
-    Why runningconfig and not blame here: the opener proves 'apply -> it is on the device'. Blame needs a story (several intents, brownfield), so it comes later.
-    CLI facts (kubectl-sdc README): the plugin is 'kubectl sdc' (NOT 'kubectl sdcio'). runningconfig takes --target and --format (json, json_ietf, xml, xpath, yaml; default yaml). It has NO path filter, so it prints everything: the '...' mark that the output is trimmed (say "trimmed", or pipe through grep in the demo).
-    Config API group is config.sdcio.dev, so the 'created' line is right. Output is illustrative: replace with real demo output (same target name as in the demo), ~6 lines. Consider a CNF-flavoured example (UPF/SMF parameter) instead of leaf-1/eth1.
-    Say you will come back to this exact flow in the demo.
-  </aside>
-</section>
-
-<!-- ============================================================ 3. ARCHITECTURE -->
-<section data-sec="Architecture" data-who="Markus">
-  <h2>What happens on <code>kubectl apply</code></h2>
-  <div class="cols" style="align-items:center">
-    <div style="flex:.8">
-      <ol class="steps">
-        <li class="fragment"><span class="step">1</span>Apply a <code>Config</code> via the <b>Kubernetes API</b></li>
-        <li class="fragment"><span class="step">2</span><b>config-server</b> accepts it</li>
-        <li class="fragment"><span class="step">3</span><b>data-server</b> validates it against the <b>YANG schema</b></li>
-        <li class="fragment"><span class="step">4</span>...and pushes it to the NF via <b>NETCONF / gNMI</b></li>
-        <li class="fragment"><span class="step">5</span>...and keeps an <b>in-memory tree</b> in sync</li>
-      </ol>
-    </div>
+<!-- ============================================================ 2. INTENTS -->
+<section data-sec="Intents" data-who="Markus">
+  <h2>Configuration as intent</h2>
+  <div class="cols">
     <div style="flex:1.2">
-      <svg class="arch-svg" viewBox="76 8 560 434" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="SDC architecture">
+<pre style="font-size:.66em"><code data-trim data-noescape>kind: Config
+metadata:
+  name: new-interface
+  labels:
+    <span class="ha hl-fr fragment custom" data-fragment-index="1">config.sdcio.dev/targetName: demo-device</span>
+spec:
+  <span class="hb hl-fr fragment custom" data-fragment-index="2">priority: 90</span>
+  <span class="hc hl-fr fragment custom" data-fragment-index="3">lifecycle:</span>
+    <span class="hc hl-fr fragment custom" data-fragment-index="3">deletionPolicy: delete</span>
+  <span class="he hl-fr fragment custom" data-fragment-index="4">revertive: true</span>
+  <span class="hd hl-fr fragment custom" data-fragment-index="5">config:</span>
+  <span class="hd hl-fr fragment custom" data-fragment-index="5">- path: /</span>
+    <span class="hd hl-fr fragment custom" data-fragment-index="5">value:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="5">interface:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="5">- name: eth1</span>
+        <span class="hd hl-fr fragment custom" data-fragment-index="5">ipv4-address: [10.10.10.10]</span></code></pre>
+    </div>
+    <div style="flex:.9">
+      <ul class="small" style="list-style:none; padding:0; margin:0">
+        <li class="fragment" data-fragment-index="1"><span class="ha">&nbsp;which device&nbsp;</span><br><span class="tiny">label pointing at the Target</span></li>
+        <li class="fragment" data-fragment-index="2" style="margin-top:.4em"><span class="hb">&nbsp;who wins&nbsp;</span><br><span class="tiny">if two Configs set the same leaf</span></li>
+        <li class="fragment" data-fragment-index="3" style="margin-top:.4em"><span class="hc">&nbsp;what if deleted&nbsp;</span><br><span class="tiny"><code>delete</code>: remove from device<br><code>orphan</code>: leave it</span></li>
+        <li class="fragment" data-fragment-index="4" style="margin-top:.4em"><span class="he">&nbsp;what if it drifts&nbsp;</span><br><span class="tiny"><code>revertive</code>: re-apply intent</span></li>
+        <li class="fragment" data-fragment-index="5" style="margin-top:.4em"><span class="hd">&nbsp;what to set&nbsp;</span><br><span class="tiny">only your part of the YANG tree</span></li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">
+    Bridge from handover: SDC discovers each device and creates a Target CR—you do not apply a Target yourself. Your Config only points at it via the targetName label (demo-device in the deck).
+    Key idea: you do NOT write the whole device config. Each Config is a snippet, so different teams/systems own different parts. That is why we need priority on the next slide.
+    Same workflow as a Deployment: kubectl apply or GitOps on this YAML (config.sdcio.dev). We name the rest of the CRDs after you have seen merge, drift, and blame.
+    Fragments colour-match the code. apiVersion/namespace left out to fit; show the full YAML as backup or in the demo.
+  </aside>
+</section>
+
+<section data-sec="Priority" data-who="Markus">
+  <h2>Intent resolution</h2>
+  <div class="pz">
+    <div class="pz-lane">
+      <div class="pz-stack">
+        <div class="pz-card p100" style="margin-left:0">
+          <span class="pz-name">initial-config<span class="pz-who">Platform &middot; baseline</span></span>
+          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">192.0.2.10</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/mtu</span><span class="pz-val" style="grid-column:3; grid-row:2">9000</span>
+          <span class="pz-prio"><small>prio</small>100</span>
+        </div>
+        <div class="pz-card p50 fragment" data-fragment-index="1" style="margin-left:0">
+          <span class="pz-name">overlap-config<span class="pz-who">Ops &middot; temp override</span></span>
+          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">20.20.20.20</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/description</span><span class="pz-val" style="grid-column:3; grid-row:2">uplink</span>
+          <span class="pz-prio"><small>prio</small>50</span>
+          <span class="pz-del fragment" data-fragment-index="3"></span>
+        </div>
+      </div>
+      <div class="pz-res pz-res2"><span class="k">device (merged result)</span>
+        <div class="pz-line">
+          <span class="p">/network/interface[name=eth0]/ipv4-address</span>
+          <span class="v">
+            <span class="fragment fade-out" data-fragment-index="1">192.0.2.10</span>
+            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3"><span class="new">20.20.20.20</span></span></span>
+            <span class="fragment" data-fragment-index="3">192.0.2.10</span>
+          </span>
+          <span class="t">
+            <span class="fragment fade-out" data-fragment-index="1">prio 100</span>
+            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3">prio 50 wins</span></span>
+            <span class="fragment" data-fragment-index="3">prio 100</span>
+          </span>
+        </div>
+        <div class="pz-line">
+          <span class="p">/network/interface[name=eth0]/mtu</span>
+          <span class="v"><span>9000</span></span>
+          <span class="t"><span>prio 100</span></span>
+        </div>
+        <div class="fragment" data-fragment-index="1">
+          <div class="pz-line fragment fade-out" data-fragment-index="3">
+            <span class="p">/network/interface[name=eth0]/description</span>
+            <span class="v"><span>uplink</span></span>
+            <span class="t"><span>prio 50</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pz-rule">
+    <p class="fragment" data-fragment-index="1" style="margin:0 0 .2em">The <b>lower</b> the priority number, the <b>higher</b> the precedence.</p>
+    <p class="fragment" data-fragment-index="2" style="margin:0 0 .2em">Without competition, the result is simply a <b>merge</b> of all intents.</p>
+    <p class="fragment" data-fragment-index="3" style="margin:0">Delete <code>overlap-config</code>: back to <code>192.0.2.10</code>, nothing was lost.</p>
+  </div>
+  <aside class="notes">
+    A story, not an abstraction: three owners with different roles; priority expresses who is allowed to win. Rule: lower number = higher precedence (docs: priority is a tie-breaker when Configs overlap). Say it out loud.
+    Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address 192.0.2.10 and mtu 9000. 2. Ops put a temporary override with prio 50: it sets the SAME leaf ipv4-address (20.20.20.20, wins because 50 beats 100) and a NEW leaf description (uplink). 3. Merged result: ipv4-address from the override, mtu from the baseline, description from the override: different leaves never compete, they are simply merged. 4. Delete the override: ipv4-address falls back to 192.0.2.10 and description goes away: the lower-priority intent was never lost.
+    The best demo of why this matters is the last bullet: the lower-priority intent is still stored, so removing the override restores it automatically. (With deletionPolicy delete, removing overlap-config also removes its values from the device; the baseline value then takes over.)
+    Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root node 'network' in this example model; use your real model's paths). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address of eth0). Setting different leaves, even under the same list entry, just merges.
+    Same Configs as in the blame slide (initial-config, new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
+    Briefly: ConfigSet exists for 'same snippet on many targets'; not needed here.
+  </aside>
+</section>
+
+<!-- ============================================================ INTENT PROCESSING (flow); backup pods slide stays Architecture -->
+<section data-sec="Intent processing" data-who="Markus">
+  <h2>An intent's journey to the device</h2>
+  <svg class="arch-svg" viewBox="0 0 1100 368" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="Intents with priorities, the device's running config and the YANG model are merged and validated into one config tree; only the delta is pushed to the device, which is read back">
+    <defs>
+      <marker id="fl-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#059669"/></marker>
+      <marker id="fl-s" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#64748b"/></marker>
+      <marker id="fl-a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#d97706"/></marker>
+      <marker id="fl-o" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#ea580c"/></marker>
+      <marker id="fl-v" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 z" fill="#7c3aed"/></marker>
+    </defs>
+
+    <!-- inputs -->
+    <rect x="10" y="15" width="300" height="90" rx="14" fill="url(#arch-node-blue)" stroke="#93c5fd" stroke-width="2"/>
+    <rect x="10" y="15" width="7" height="90" rx="3" fill="#2563eb"/>
+    <text x="165" y="48" text-anchor="middle" font-size="20" font-weight="700" fill="#1e3a8a">Intents</text>
+    <text x="165" y="72" text-anchor="middle" font-size="15" fill="#475569">Config resources, each with a priority</text>
+    <text x="165" y="92" text-anchor="middle" font-size="14" fill="#64748b">from Kubernetes (kubectl, GitOps)</text>
+
+    <rect x="10" y="130" width="300" height="90" rx="14" fill="url(#arch-node-gold)" stroke="#fcd34d" stroke-width="2"/>
+    <rect x="10" y="130" width="7" height="90" rx="3" fill="#d97706"/>
+    <text x="165" y="163" text-anchor="middle" font-size="20" font-weight="700" fill="#92400e">YANG model</text>
+    <text x="165" y="187" text-anchor="middle" font-size="15" fill="#475569">the device's own schema</text>
+    <text x="165" y="207" text-anchor="middle" font-size="14" fill="#64748b">from Git</text>
+
+    <rect x="10" y="245" width="300" height="90" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <rect x="10" y="245" width="7" height="90" rx="3" fill="#64748b"/>
+    <text x="165" y="278" text-anchor="middle" font-size="20" font-weight="700" fill="#334155">Running config</text>
+    <text x="165" y="302" text-anchor="middle" font-size="15" fill="#475569">what the device really has</text>
+    <text x="165" y="322" text-anchor="middle" font-size="15" font-weight="700" fill="#334155">brownfield included</text>
+
+    <!-- SDC pipeline on the validated tree -->
+    <rect x="400" y="15" width="340" height="320" rx="16" fill="url(#arch-node-violet)" stroke="#c4b5fd" stroke-width="2"/>
+    <rect x="400" y="15" width="340" height="52" rx="16" fill="#ede9fe"/>
+    <text x="570" y="48" text-anchor="middle" font-size="21" font-weight="700" fill="#5b21b6">SDC: one config tree</text>
+    <rect x="425" y="78" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="101" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">1 Merge</text>
+    <text x="570" y="120" text-anchor="middle" font-size="14" fill="#475569">overlaps resolved by priority</text>
+    <rect x="425" y="144" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="167" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">2 Validate</text>
+    <text x="570" y="186" text-anchor="middle" font-size="14" fill="#475569">the whole result, against YANG</text>
+    <rect x="425" y="210" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="233" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">3 Diff</text>
+    <text x="570" y="252" text-anchor="middle" font-size="14" fill="#475569">tree versus what is on the device</text>
+    <rect x="425" y="276" width="290" height="52" rx="12" fill="#fff" stroke="#c4b5fd" stroke-width="1.5"/>
+    <text x="570" y="299" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">4 Translate</text>
+    <text x="570" y="318" text-anchor="middle" font-size="14" fill="#475569">delta → NETCONF / gNMI · per-NOS rules</text>
+    <g fill="none" stroke="#7c3aed" stroke-width="2.75" stroke-linecap="round">
+      <path d="M 570 130 L 570 144" marker-end="url(#fl-v)"/>
+      <path d="M 570 196 L 570 210" marker-end="url(#fl-v)"/>
+      <path d="M 570 262 L 570 276" marker-end="url(#fl-v)"/>
+    </g>
+
+    <!-- device -->
+    <rect x="880" y="115" width="210" height="120" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <text x="985" y="165" text-anchor="middle" font-size="22" font-weight="700" fill="#334155">Device</text>
+    <text x="985" y="192" text-anchor="middle" font-size="15" fill="#64748b">network function</text>
+    <text x="985" y="214" text-anchor="middle" font-size="14" fill="#64748b">speaks YANG</text>
+
+    <!-- arrows -->
+    <g fill="none" stroke-linecap="round" stroke-width="2.75">
+      <path d="M 310 60 L 400 60" stroke="#059669" marker-end="url(#fl-g)"/>
+      <path d="M 310 175 L 400 175" stroke="#d97706" marker-end="url(#fl-a)"/>
+      <path d="M 310 290 L 400 290" stroke="#64748b" marker-end="url(#fl-s)"/>
+      <path d="M 740 175 L 880 175" stroke="#64748b" marker-end="url(#fl-s)"/>
+      <path d="M 985 235 V 350 H 165 V 335" stroke="#ea580c" stroke-dasharray="8 6" marker-end="url(#fl-o)"/>
+    </g>
+    <g font-size="14.5" font-weight="600">
+      <rect x="758" y="118" width="104" height="24" rx="12" fill="#fff" stroke="#e2e8f0"/>
+      <text x="810" y="135" text-anchor="middle" fill="#047857">only the delta</text>
+      <rect x="560" y="338" width="178" height="24" rx="12" fill="#fff7ed" stroke="#fdba74"/>
+      <text x="635" y="355" text-anchor="middle" fill="#c2410c">read back (sync)</text>
+    </g>
+  </svg>
+  <aside class="notes">
+    High-level gain: SDC does not forward your Config. It builds ONE tree per device from three inputs (all intents with their priorities, the device's running config incl. brownfield, the YANG model), validates the WHOLE result, and pushes only the difference to the device.
+    This slide comes right after Priority: recap, do not re-teach it (about 60-90 s). Walk the diagram only: parallel inputs into 1 Merge, 2 Validate, then 3 Diff (what changed versus the device) and 4 Translate (turn the delta into the southbound format). Diff and translate are separate on purpose: the tree is complete before anything is computed or sent. Read-back loop sets up Deviations. No bottom bullets; detail stays in notes.
+    Docs (system-architecture/data-server): candidate tree = deep copy of the synced (running) tree + all intents; same leaf set by several intents: lowest priority NUMBER wins; YANG validation; diff; only then the south-bound Set (confirmed commit with auto-rollback timer).
+    Brownfield: stays in the tree as 'running' with the lowest precedence. No intent owns it, so it is reported as an UNHANDLED deviation; SDC does not remove it.
+    Rollback: the push is a confirmed commit. If the transaction is not confirmed within the timeout, data-server re-runs the previous intent content and the device returns to its prior state.
+    Rejection (say it out loud): a config that fails validation never reaches the device, and the user sees the error on the Config.
+    Discovery (one sentence): a DiscoveryRule finds the device and creates its Target, so you never write one.
+    Translate (one sentence, optional): after diff, only the delta is encoded for NETCONF or gNMI. Roadmap (do not dwell): a further per-NOS layer will shape how updates are packaged, e.g. one gNMI Set per YANG module with JSON-IETF where the OS requires it instead of one bulk update under /. That is why translate stays its own step, not folded into diff.
+    Kubernetes speaks resources; the device speaks YANG over the driver. No per-vendor CRDs in your cluster.
+    Read-back (sync): subscriptions/polling keep the tree current; mismatch between winner and device = deviation.
+    Backup slide after this one shows the real pods, only open it if asked.
+  </aside>
+</section>
+
+<section data-sec="Architecture" data-who="Markus" data-visibility="hidden">
+  <h2>Backup: what runs where</h2>
+  <div class="cols" style="align-items:center">
+    <div style="flex:1">
+      <svg class="arch-svg" viewBox="20 8 1000 500" width="100%" xmlns="http://www.w3.org/2000/svg" aria-label="SDC architecture: pods in sdc-system">
         <defs>
           <linearGradient id="arch-bg" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="#f8fafc"/><stop offset="100%" stop-color="#eef2ff"/>
@@ -1318,227 +1534,120 @@ $ kubectl sdc runningconfig --target leaf-1 --format xpath
           <marker id="arch-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
             <path d="M0,0 L8,3 L0,6 z" fill="#059669"/>
           </marker>
+          <marker id="arch-arrow-2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto-start-reverse" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#3b82f6"/>
+          </marker>
+          <marker id="arch-arrow-violet-2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto-start-reverse" markerUnits="strokeWidth">
+            <path d="M0,0 L8,3 L0,6 z" fill="#7c3aed"/>
+          </marker>
         </defs>
 
-        <!-- tight frame: CX_L=220 CX_R=490 W=204 H=58 LINK=34; Kubernetes API is fused onto config-server (aggregated API behind the main API server) -->
-        <rect x="84" y="16" width="544" height="418" rx="18" fill="url(#arch-bg)" stroke="#dbeafe" stroke-width="1.25"/>
+        <!-- outside the namespace -->
+        <rect x="40" y="16" width="650" height="50" rx="14" fill="url(#arch-k8s-pill)"/>
+        <text x="365" y="49" text-anchor="middle" fill="#fff" font-size="21" font-weight="700">Kubernetes API</text>
+        <rect x="740" y="16" width="250" height="50" rx="14" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+        <text x="865" y="39" text-anchor="middle" font-size="18" font-weight="700" fill="#92400e">Git (YANG)</text>
+        <text x="865" y="58" text-anchor="middle" font-size="14" fill="#64748b">vendor models</text>
+        <rect x="780" y="452" width="220" height="48" rx="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="890" y="474" text-anchor="middle" font-size="18" font-weight="700" fill="#334155">NF</text>
+        <text x="890" y="492" text-anchor="middle" font-size="14" fill="#64748b">network function</text>
+
+        <!-- namespace frame -->
+        <rect x="24" y="108" width="992" height="326" rx="18" fill="url(#arch-bg)" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 6"/>
+        <text x="44" y="132" font-size="14" font-weight="700" fill="#64748b" letter-spacing=".06em">NAMESPACE  sdc-system</text>
+
+        <!-- pod 1: api-server -->
+        <g filter="url(#arch-node-shadow)">
+          <rect x="40" y="146" width="240" height="238" rx="14" fill="url(#arch-node-blue)" stroke="#93c5fd" stroke-width="2"/>
+        </g>
+        <rect x="40" y="146" width="240" height="40" rx="14" fill="#dbeafe"/>
+        <text x="160" y="172" text-anchor="middle" font-size="18" font-weight="700" fill="#1e3a8a">api-server</text>
+        <text x="160" y="240" text-anchor="middle" font-size="19" font-weight="700" fill="#1e3a8a">config-server</text>
+        <text x="160" y="264" text-anchor="middle" font-size="15" fill="#475569">aggregated API</text>
+        <text x="160" y="298" text-anchor="middle" font-size="15" font-family="Consolas, monospace" fill="#334155">config.sdcio.dev</text>
+        <text x="160" y="350" text-anchor="middle" font-size="14" fill="#64748b">own store, not etcd</text>
+
+        <!-- pod 2: controller -->
+        <g filter="url(#arch-node-shadow)">
+          <rect x="300" y="146" width="240" height="238" rx="14" fill="url(#arch-node-violet)" stroke="#c4b5fd" stroke-width="2"/>
+        </g>
+        <rect x="300" y="146" width="240" height="40" rx="14" fill="#ede9fe"/>
+        <text x="420" y="172" text-anchor="middle" font-size="18" font-weight="700" fill="#5b21b6">controller</text>
+        <text x="420" y="240" text-anchor="middle" font-size="17" font-weight="700" fill="#5b21b6">Fleet-level controllers</text>
+        <g font-size="15" text-anchor="middle" fill="#334155">
+          <text x="420" y="274">DiscoveryRule</text>
+          <text x="420" y="298">ConfigSet</text>
+        </g>
+
+        <!-- pod 3: data-server pod -->
+        <g filter="url(#arch-node-shadow)">
+          <rect x="560" y="146" width="440" height="238" rx="14" fill="url(#arch-node-gold)" stroke="#fcd34d" stroke-width="2"/>
+        </g>
+        <rect x="560" y="146" width="440" height="40" rx="14" fill="#fef3c7"/>
+        <text x="780" y="172" text-anchor="middle" font-size="18" font-weight="700" fill="#92400e">data-server pod</text>
+
+        <rect x="574" y="200" width="150" height="170" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5"/>
+        <text x="649" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#92400e">controller</text>
+        <g font-size="15" text-anchor="middle" fill="#334155">
+          <text x="649" y="262" font-weight="700">Schema</text>
+          <text x="649" y="282" font-size="13" fill="#64748b">downloads YANG</text>
+          <text x="649" y="316">Target</text>
+          <text x="649" y="340">Subscription</text>
+        </g>
+
+        <rect x="770" y="200" width="216" height="170" rx="12" fill="#fff" stroke="#2563eb" stroke-width="2.5"/>
+        <text x="878" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a8a">data-server</text>
+        <g font-size="15" text-anchor="middle" fill="#334155">
+          <text x="878" y="254">validate</text>
+          <text x="878" y="276">push to NF</text>
+          <text x="878" y="298">in-memory tree</text>
+        </g>
+        <rect x="784" y="314" width="188" height="48" rx="8" fill="#f5f3ff" stroke="#c4b5fd"/>
+        <text x="878" y="335" text-anchor="middle" font-size="15" font-weight="700" fill="#5b21b6">schema-server</text>
+        <text x="878" y="353" text-anchor="middle" font-size="12" fill="#64748b">built in, serves YANG</text>
 
         <!-- connectors -->
         <g fill="none" stroke-linecap="round" stroke-width="2.75">
-          <path d="M 220 86 L 220 142" stroke="#059669" marker-end="url(#arch-arrow-green)"/>
-          <path d="M 220 234 L 220 268" stroke="#3b82f6" marker-end="url(#arch-arrow)"/>
-          <path d="M 220 326 L 220 360" stroke="#64748b" marker-end="url(#arch-arrow-slate)"/>
-          <path d="M 322 297 L 388 297" stroke="#7c3aed" marker-end="url(#arch-arrow-violet)"/>
-          <path d="M 490 360 L 490 326" stroke="#d97706" stroke-dasharray="8 6" marker-end="url(#arch-arrow-amber)"/>
+          <path d="M 160 66 L 160 146" stroke="#059669" marker-end="url(#arch-arrow-green)"/>
+          <path d="M 420 66 L 420 146" stroke="#3b82f6" marker-start="url(#arch-arrow-2)" marker-end="url(#arch-arrow-2)"/>
+          <path d="M 640 66 L 640 146" stroke="#3b82f6" marker-start="url(#arch-arrow-2)" marker-end="url(#arch-arrow-2)"/>
+          <path d="M 865 66 L 865 146" stroke="#d97706" stroke-dasharray="8 6" marker-end="url(#arch-arrow-amber)"/>
+          <path d="M 724 285 L 770 285" stroke="#7c3aed" marker-start="url(#arch-arrow-violet-2)" marker-end="url(#arch-arrow-violet-2)"/>
+          <path d="M 160 384 V 404 H 840 V 384" stroke="#7c3aed" marker-end="url(#arch-arrow-violet)"/>
+          <path d="M 420 384 V 404" stroke="#7c3aed"/>
+          <path d="M 890 384 L 890 452" stroke="#64748b" marker-end="url(#arch-arrow-slate)"/>
         </g>
 
         <!-- label pills -->
-        <g font-size="14.5" font-weight="600" fill="#475569">
-          <rect x="234" y="103" width="64" height="24" rx="12" fill="#ecfdf5" stroke="#6ee7b7"/>
-          <text x="266" y="120" text-anchor="middle" fill="#047857">apply</text>
-          <rect x="234" y="240" width="56" height="24" rx="12" fill="#fff" stroke="#e2e8f0"/>
-          <text x="262" y="257" text-anchor="middle">gRPC</text>
-          <rect x="328" y="268" width="56" height="24" rx="12" fill="#fff" stroke="#e2e8f0"/>
-          <text x="356" y="285" text-anchor="middle">gRPC</text>
-          <rect x="234" y="331" width="150" height="24" rx="12" fill="#fff" stroke="#e2e8f0"/>
-          <text x="309" y="348" text-anchor="middle">NETCONF / gNMI</text>
-          <rect x="504" y="331" width="64" height="24" rx="12" fill="#fffbeb" stroke="#fcd34d"/>
-          <text x="536" y="348" text-anchor="middle" fill="#b45309">loads</text>
+        <g font-size="14" font-weight="600" fill="#475569">
+          <rect x="174" y="92" width="60" height="22" rx="11" fill="#ecfdf5" stroke="#6ee7b7"/>
+          <text x="204" y="108" text-anchor="middle" fill="#047857">apply</text>
+          <rect x="434" y="82" width="120" height="22" rx="11" fill="#eff6ff" stroke="#93c5fd"/>
+          <text x="494" y="98" text-anchor="middle" fill="#1d4ed8">watch · update</text>
+          <rect x="654" y="82" width="120" height="22" rx="11" fill="#eff6ff" stroke="#93c5fd"/>
+          <text x="714" y="98" text-anchor="middle" fill="#1d4ed8">watch · update</text>
+          <rect x="879" y="82" width="100" height="22" rx="11" fill="#fffbeb" stroke="#fcd34d"/>
+          <text x="929" y="98" text-anchor="middle" fill="#b45309">clone YANG</text>
+          <rect x="400" y="393" width="300" height="22" rx="11" fill="#f5f3ff" stroke="#c4b5fd"/>
+          <text x="550" y="409" text-anchor="middle" fill="#5b21b6">gRPC: running config · blame</text>
+          <rect x="904" y="408" width="106" height="22" rx="11" fill="#fff" stroke="#e2e8f0"/>
+          <text x="957" y="424" text-anchor="middle">NETCONF / gNMI</text>
         </g>
 
-        <!-- YAML document (paper, not a service box) -->
-        <g filter="url(#arch-paper-shadow)">
-          <path d="M 155 38 H 285 V 86 H 155 Z" fill="#fffef7" stroke="#94a3b8" stroke-width="1.25"/>
-          <rect x="161" y="43" width="56" height="16" rx="3" fill="#d1fae5" stroke="#6ee7b7"/>
-          <text x="189" y="55" text-anchor="middle" font-family="Consolas, monospace" font-size="11.5" font-weight="700" fill="#047857">.yaml</text>
-          <text x="248" y="55" text-anchor="middle" font-family="Consolas, monospace" font-size="13" font-weight="700" fill="#334155">config</text>
-          <line x1="165" y1="64" x2="275" y2="64" stroke="#cbd5e1" stroke-width="1.75"/>
-          <line x1="165" y1="70" x2="259" y2="70" stroke="#e2e8f0" stroke-width="1.75"/>
-          <text x="220" y="83" text-anchor="middle" font-size="12" fill="#64748b">configuration intent</text>
-        </g>
-
-        <!-- Kubernetes API fused with config-server (one block: shared edge, no gap) -->
-        <g filter="url(#arch-node-shadow)">
-          <path d="M 118 176 V 156 A 14 14 0 0 1 132 142 H 308 A 14 14 0 0 1 322 156 V 176 Z" fill="url(#arch-k8s-pill)"/>
-          <path d="M 118 176 H 322 V 220 A 14 14 0 0 1 308 234 H 132 A 14 14 0 0 1 118 220 Z" fill="url(#arch-node-blue)" stroke="#93c5fd" stroke-width="1.5"/>
-          <path d="M 118 176 H 124 V 234 H 132 A 14 14 0 0 1 118 220 Z" fill="#2563eb"/>
-        </g>
-        <text x="220" y="165" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">Kubernetes API</text>
-
-        <!-- service nodes -->
-        <g font-size="19" text-anchor="middle">
-          <g filter="url(#arch-node-shadow)">
-            <rect x="118" y="268" width="204" height="58" rx="14" fill="url(#arch-node-blue)" stroke="#93c5fd" stroke-width="1.5"/>
-            <rect x="118" y="268" width="6" height="58" rx="3" fill="#2563eb"/>
-            <rect x="118" y="360" width="204" height="58" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
-            <rect x="118" y="360" width="6" height="58" rx="3" fill="#64748b"/>
-            <rect x="388" y="268" width="204" height="58" rx="14" fill="url(#arch-node-violet)" stroke="#c4b5fd" stroke-width="1.5"/>
-            <rect x="388" y="268" width="6" height="58" rx="3" fill="#7c3aed"/>
-            <rect x="388" y="360" width="204" height="58" rx="14" fill="url(#arch-node-gold)" stroke="#fcd34d" stroke-width="1.5"/>
-            <rect x="388" y="360" width="6" height="58" rx="3" fill="#d97706"/>
-          </g>
-          <text x="220" y="203" font-weight="700" fill="#1e3a8a">config-server</text>
-          <text x="220" y="224" font-size="14" fill="#475569">aggregated API</text>
-          <text x="220" y="293" font-weight="700" fill="#1e3a8a">data-server</text>
-          <text x="220" y="314" font-size="14" fill="#475569">validate · push · sync</text>
-          <text x="220" y="385" font-weight="700" fill="#334155">NF</text>
-          <text x="220" y="406" font-size="14" fill="#475569">network function</text>
-          <text x="490" y="293" font-weight="700" fill="#5b21b6">schema-server</text>
-          <text x="490" y="314" font-size="14" fill="#475569">YANG over gRPC</text>
-          <text x="490" y="385" font-weight="700" fill="#92400e">Git (YANG)</text>
-          <text x="490" y="406" font-size="14" fill="#475569">vendor models</text>
-        </g>
       </svg>
     </div>
   </div>
   <aside class="notes">
-    The fragments step through the numbered list. Steps 4 and 5 both belong to the data-server (push to the NF, keep the in-memory tree in sync).
-    Direction of the Git arrow: the schema-server PULLS (loads) YANG from Git.
-    Be precise about roles - it came up before:
-    - config-server: the Kubernetes face of SDC (aggregated API server + controllers for Schema, Discovery, Target). It also rejects configs that fail validation.
-    - data-server: the workhorse. Talks to the device (NETCONF/gNMI), keeps the in-memory tree, and VALIDATES using the schema.
-    - schema-server: only a repository of schemas (vendor/version), served over gRPC. It does NOT validate; the data-server uses its YANG-based structures to validate.
+    Second architecture slide: the same picture as the flow slide, now as real pods. Don't re-walk the five steps; just point at where each box lives.
+    Three workloads in sdc-system: api-server (Deployment), controller (Deployment), data-server pod (StatefulSet, 2 containers).
+    Be precise about roles:
+    - api-server: the config-server, an aggregated API server (config.sdcio.dev: Config, ConfigSet, Target, RunningConfig, Deviation, Blame). Own Badger store on a PVC, not etcd.
+    - controller (Deployment): fleet-level controllers (DiscoveryRule, ConfigSet). No schema handling.
+    - data-server pod: its controller container downloads the YANG from Git (Schema controller) and runs Target / Subscription. The data-server container VALIDATES using the schema, pushes to the NF (NETCONF/gNMI) and keeps the in-memory tree.
+    - schema-server: built into the data-server process, only serves the YANG-based schemas. It does NOT validate on its own.
+    - The api-server and the controller call the data-server over gRPC (running config, blame).
     Emphasise: validation happens BEFORE anything touches the device.
     Keep it under 90 seconds.
-  </aside>
-</section>
-
-<!-- ============================================================ 4. RESOURCES -->
-<section data-sec="Resources" data-who="Markus">
-  <h2>What you write, what you get back</h2>
-  <div class="rs-steps">
-    <div class="rs-step fragment" data-fragment-index="1">
-      <span class="rs-n in">1</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>You write</b> the infrastructure <span class="rs-api">inv.sdcio.dev</span></div>
-        <div class="chips"><span class="chip in">Schema</span><span class="chip in">DiscoveryRule</span><span class="chip in">TargetConnectionProfile</span><span class="chip in">TargetSyncProfile</span><span class="chip in">credentials Secret</span></div>
-      </div>
-    </div>
-    <div class="rs-step fragment" data-fragment-index="2">
-      <span class="rs-n out">2</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>SDC derives</b> one device per discovery <span class="rs-api">config.sdcio.dev</span></div>
-        <div class="chips"><span class="chip out">Target</span></div>
-      </div>
-    </div>
-    <div class="rs-step fragment" data-fragment-index="3">
-      <span class="rs-n in">3</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>You write</b> the intent, applied to the Target <span class="rs-api">config.sdcio.dev</span></div>
-        <div class="chips"><span class="chip in">Config</span><span class="chip in">ConfigSet</span></div>
-      </div>
-    </div>
-    <div class="rs-step fragment" data-fragment-index="4">
-      <span class="rs-n out">4</span>
-      <div class="rs-body">
-        <div class="rs-txt"><b>SDC reads back</b> what the device really has, brownfield included <span class="rs-api">config.sdcio.dev</span></div>
-        <div class="chips"><span class="chip out">RunningConfig</span><span class="chip out">Deviation</span><span class="chip out">ConfigBlame</span></div>
-      </div>
-    </div>
-  </div>
-  <p class="rs-note fragment" data-fragment-index="5" style="margin-top:.8em; font-size:.74em">Steps 3 and 4 do not depend on each other: apply and sync run independently, together they form the loop.</p>
-  <aside class="notes">
-    Researched against docs.sdcio.dev (config-server, target, discovery, config, configset, deviation). API is v1alpha1: re-check before the talk.
-
-    TWO API GROUPS (one sentence):
-    - inv.sdcio.dev (plain CRDs, etcd): Schema, DiscoveryRule, TargetConnectionProfile, TargetSyncProfile, plus Subscription (not on the slide).
-    - config.sdcio.dev (aggregated API server, Badger store, NOT etcd): Target, Config, ConfigSet, Deviation, RunningConfig, ConfigBlame. Why not etcd: a Config can hold a whole device config, megabytes, over etcd's ~1.5 MB object limit.
-
-    YOU WRITE:
-    - Schema: YANG provider + version (e.g. srl.nokia.sdcio.dev 24.10.1), from Git.
-    - DiscoveryRule: scans addresses/prefixes periodically, creates Targets. Provider/version via defaultSchema or detected via DiscoveryVendorProfile(s). Attaches connection profile, sync profile, credentials.
-    - TargetConnectionProfile: protocol (gNMI/NETCONF), port, encoding, NETCONF version, commit candidate, insecure/skipVerify.
-    - TargetSyncProfile: how SDC keeps its view of the device current: syncs with protocol, paths, mode (gNMI get/once/sample/on-change; NETCONF polls), interval. Feeds RunningConfig and deviation detection.
-    - Credentials: a Kubernetes Secret.
-    - Config: intent for ONE target (labels config.sdcio.dev/targetName and targetNamespace). path/value snippets, priority, lifecycle.deletionPolicy, revertive.
-    - ConfigSet: template with a targetSelector; creates/updates one Config per matching target and deletes the ones that no longer match. Ideal for fleet-wide settings and the 14-NF Swisscom case.
-
-    SDC DERIVES (created or computed by SDC, read-only for you):
-    - Target: normally created by the DiscoveryRule controller, not by the user (docs: "not explicitly created by an end user"). Say "documented way", not "impossible".
-    - RunningConfig: live device state via sync.
-    - Deviation: one per Target and one per Config CR. With no Config CR, ALL brownfield config is one UNHANDLED deviation per target.
-    - ConfigBlame: per-path ownership.
-    There is NO "UnManagedConfig" resource. Do not mention it.
-
-    The point that you don't write a Target (DiscoveryRule + connection profile + sync profile + schema produce it) is NOT on the slide any more: you have already said it earlier (e.g. while explaining the architecture / discovery). The table shows it implicitly: Target sits in the 'SDC derives' column. If you did not cover it earlier, say it once when the Device row appears.
-  </aside>
-</section>
-
-<!-- ============================================================ 5. INTENTS -->
-<section data-sec="Intents" data-who="Markus">
-  <h2>An intent is a small YAML snippet for one device</h2>
-  <div class="cols">
-    <div style="flex:1.2">
-<pre style="font-size:.66em"><code data-trim data-noescape>kind: Config
-metadata:
-  name: new-interface
-  labels:
-    <span class="ha">config.sdcio.dev/targetName: demo-device</span>
-spec:
-  <span class="hb">priority: 90</span>
-  <span class="hc">lifecycle:</span>
-    <span class="hc">deletionPolicy: delete</span>
-  <span class="he">revertive: true</span>
-  <span class="hd">config:</span>
-  <span class="hd">- path: /</span>
-    <span class="hd">value:</span>
-      <span class="hd">interface:</span>
-      <span class="hd">- name: eth1</span>
-        <span class="hd">ipv4-address: [10.10.10.10]</span></code></pre>
-    </div>
-    <div style="flex:.9">
-      <ul class="small" style="list-style:none; padding:0; margin:0">
-        <li class="fragment"><span class="ha">&nbsp;which device&nbsp;</span><br><span class="tiny">label pointing at the Target</span></li>
-        <li class="fragment" style="margin-top:.4em"><span class="hb">&nbsp;who wins&nbsp;</span><br><span class="tiny">if two Configs set the same leaf</span></li>
-        <li class="fragment" style="margin-top:.4em"><span class="hc">&nbsp;what if deleted&nbsp;</span><br><span class="tiny"><code>delete</code>: remove from device<br><code>orphan</code>: leave it</span></li>
-        <li class="fragment" style="margin-top:.4em"><span class="he">&nbsp;what if it drifts&nbsp;</span><br><span class="tiny"><code>revertive</code>: re-apply intent</span></li>
-        <li class="fragment" style="margin-top:.4em"><span class="hd">&nbsp;what to set&nbsp;</span><br><span class="tiny">only your part of the YANG tree</span></li>
-      </ul>
-    </div>
-  </div>
-  <aside class="notes">
-    Key idea: you do NOT write the whole device config. Each Config is a snippet, so different teams/systems own different parts. That is why we need priority on the next slide.
-    Fragments colour-match the code. apiVersion/namespace left out to fit; show the full YAML as backup or in the demo.
-  </aside>
-</section>
-
-<section data-sec="Priority" data-who="Markus">
-  <h2>Several teams, one device: who wins?</h2>
-  <div class="pz">
-    <div class="pz-lane">
-      <div class="pz-lh">Both set the same leaf: <code>eth0 / ipv4-address</code></div>
-      <div class="pz-stack">
-        <div class="pz-card p50 fragment" data-fragment-index="3">
-          <span class="pz-name">overlap-config<span class="pz-who">Ops &middot; temp override</span></span>
-          <span class="pz-sets">ipv4-address: <span class="hl">20.20.20.20</span></span>
-          <span class="pz-prio"><small>prio</small>50</span>
-        </div>
-        <div class="pz-card p100 fragment" data-fragment-index="1">
-          <span class="pz-name">initial-config<span class="pz-who">Platform &middot; baseline</span></span>
-          <span class="pz-sets">ipv4-address: 192.0.2.10</span>
-          <span class="pz-prio"><small>prio</small>100</span>
-        </div>
-      </div>
-      <div class="pz-res"><span class="k">device</span>
-        <span class="v">
-          <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3">192.0.2.10</span></span>
-          <span class="new fragment" data-fragment-index="3">20.20.20.20</span>
-        </span>
-      </div>
-    </div>
-  </div>
-  <div class="pz-rule">
-    <p class="fragment" data-fragment-index="3" style="margin:0 0 .2em">Same leaf set twice: <b>lower number wins</b>, so <b>50 beats 100</b>.</p>
-    <p class="fragment" data-fragment-index="4" style="margin:0 0 .2em">Delete <code>overlap-config</code>: the leaf <b>falls back to <code>192.0.2.10</code></b>. Nothing was lost.</p>
-    <p class="fragment" data-fragment-index="5" style="margin:0">Configs that set <b>different leaves</b> don't compete: they are simply merged.</p>
-  </div>
-  <aside class="notes">
-    A story, not an abstraction: three owners with different roles; priority expresses who is allowed to win. Rule: lower number = higher precedence (docs: priority is a tie-breaker when Configs overlap). Say it out loud.
-    Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address. 2. Ops put a temporary override on the SAME leaf with prio 50: it wins, the device shows 20.20.20.20. 3. Delete the override and the baseline value is back: the lower-priority intent was never lost. 4. One line: Configs that set different leaves (like new-interface setting eth1, which you saw on the previous slide) never compete, they are simply merged.
-    The best demo of why this matters is the last bullet: the lower-priority intent is still stored, so removing the override restores it automatically. (With deletionPolicy delete, removing overlap-config also removes its values from the device; the baseline value then takes over.)
-    Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root node 'network' in this example model; use your real model's paths). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address of eth0). Setting different leaves, even under the same list entry, just merges.
-    Same Configs as in the blame slide (initial-config, new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
-    Briefly: ConfigSet exists for 'same snippet on many targets'; not needed here.
   </aside>
 </section>
 
@@ -1604,6 +1713,105 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
     Notation: the value after '->' is ALWAYS what is running on the device; the intended value is in the brackets. Since Sept 2025 (sdc-protos commit "BlameTreeElement: Change the rendering of a deviated running") it is '-> actual [~> expected]'; it used to be 'expected [-> actual]'. The commit text was garbled, so CHECK the exact glyph (~> or ->) in real output, and RE-TAKE any old screenshot (also: old screenshot says 'kubectl sdcio', the plugin is 'kubectl sdc').
     Tips: --filter-deviation shows only deviated leaves; --filter-owner running shows brownfield only; --filter-path "*/interface/*"; filters are ANDed; --format xpath and --interactive exist.
     Blame shines with SEVERAL intents plus brownfield config. Pitch: audit, troubleshooting, onboarding brownfield devices.
+    Transition to the next slide: "Now zoom out—here is the full Kubernetes surface for everything we just walked through."
+  </aside>
+</section>
+
+<!-- ============================================================ RESOURCES (capstone) -->
+<section data-sec="Resources" data-who="Markus">
+  <h2>What you write, what you get back</h2>
+  <div class="rs-steps">
+    <div class="rs-step fragment" data-fragment-index="1">
+      <span class="rs-n in">1</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>You write</b> the infrastructure <span class="rs-api">inv.sdcio.dev</span></div>
+        <div class="chips"><span class="chip in">DiscoveryRule</span><span class="chip in">TargetConnectionProfile</span><span class="chip in">TargetSyncProfile</span><span class="chip in">Secret</span></div>
+        <div class="chips" style="margin-top:.45em; padding-top:.4em; border-top:1px dashed #c9d6f5; align-items:center"><span class="chip in">Schema</span><span style="font-size:.6em; color:#64748b">the YANG models to use, from Git</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="2">
+      <span class="rs-n out">2</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>SDC derives</b> one device per discovery <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip out">Target</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="3">
+      <span class="rs-n in">3</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>You write</b> the intent, applied to the Target <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip in">Config</span><span class="chip in">ConfigSet</span></div>
+      </div>
+    </div>
+    <div class="rs-step fragment" data-fragment-index="4">
+      <span class="rs-n out">4</span>
+      <div class="rs-body">
+        <div class="rs-txt"><b>SDC reads back</b> what the device really has, brownfield included <span class="rs-api">config.sdcio.dev</span></div>
+        <div class="chips"><span class="chip out">RunningConfig</span><span class="chip out">Deviation</span><span class="chip out">ConfigBlame</span></div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    CAPSTONE, not opener: the audience already knows Config, priority, the intent pipeline, deviations, and blame. This slide maps those ideas onto CRDs and API groups—do not re-teach merge or NOT_APPLIED.
+    Researched against docs.sdcio.dev (config-server, target, discovery, config, configset, deviation). API is v1alpha1: re-check before the talk.
+
+    TWO API GROUPS (one sentence):
+    - inv.sdcio.dev (plain CRDs, etcd): Schema, DiscoveryRule, TargetConnectionProfile, TargetSyncProfile, plus Subscription (not on the slide).
+    - config.sdcio.dev (aggregated API server, Badger store, NOT etcd): Target, Config, ConfigSet, Deviation, RunningConfig, ConfigBlame. Why not etcd: a Config can hold a whole device config, megabytes, over etcd's ~1.5 MB object limit.
+
+    YOU WRITE:
+    - Schema: YANG provider + version (e.g. srl.nokia.sdcio.dev 24.10.1), from Git.
+    - DiscoveryRule: scans addresses/prefixes periodically, creates Targets. Provider/version via defaultSchema or detected via DiscoveryVendorProfile(s). Attaches connection profile, sync profile, credentials.
+    - TargetConnectionProfile: protocol (gNMI/NETCONF), port, encoding, NETCONF version, commit candidate, insecure/skipVerify.
+    - TargetSyncProfile: how SDC keeps its view of the device current: syncs with protocol, paths, mode (gNMI get/once/sample/on-change; NETCONF polls), interval. Feeds RunningConfig and deviation detection.
+    - Credentials: a Kubernetes Secret.
+    - Config: intent for ONE target (labels config.sdcio.dev/targetName and targetNamespace). path/value snippets, priority, lifecycle.deletionPolicy, revertive.
+    - ConfigSet: template with a targetSelector; creates/updates one Config per matching target and deletes the ones that no longer match. Ideal for fleet-wide settings and the 14-NF Swisscom case.
+
+    SDC DERIVES (created or computed by SDC, read-only for you):
+    - Target: normally created by the DiscoveryRule controller, not by the user (docs: "not explicitly created by an end user"). Say "documented way", not "impossible".
+    - RunningConfig: live device state via sync—the input to diff on the intent journey slide.
+    - Deviation: one per Target and one per Config CR. With no Config CR, ALL brownfield config is one UNHANDLED deviation per target.
+    - ConfigBlame: per-path ownership—the tree view you just saw.
+    There is NO "UnManagedConfig" resource. Do not mention it.
+
+    Step 4 is observability, not a fifth apply step: sync keeps RunningConfig current; mismatches surface as Deviation; blame is the human-friendly view. kubectl sdc is the usual way to work with that read-back (next slide).
+    Transition: "Those CRDs are the SDC platform; around it there are two more open-source tools operators actually use."
+    ~90 seconds unless Q&A; then ecosystem.
+  </aside>
+</section>
+
+<!-- ============================================================ ECOSYSTEM -->
+<section data-sec="Ecosystem" data-who="Markus">
+  <h2>The SDC ecosystem</h2>
+  <div class="eco-row">
+    <div class="eco-card c-hub fragment" data-fragment-index="1">
+      <h3>SDC</h3>
+      <p>Runs <b>in the cluster</b>: discovery, intent merge, validation, southbound drivers, sync.</p>
+      <span class="eco-repo">github.com/sdcio/sdc</span>
+    </div>
+    <div class="eco-card c-cli fragment" data-fragment-index="2">
+      <h3><code>kubectl sdc</code></h3>
+      <p><b>Kubectl plugin</b> for the SDC API — inspect what is really on the device, who owns each leaf, and handle drift; same context and RBAC as always.</p>
+      <span class="eco-repo">github.com/sdcio/kubectl-sdc</span>
+    </div>
+    <div class="eco-card c-lite fragment" data-fragment-index="3">
+      <h3>sdc-lite</h3>
+      <p><b>Local CLI</b> — YANG schemas and configs on your machine or in CI, no cluster required.</p>
+      <div class="chips"><span class="chip">validate</span><span class="chip">diff</span><span class="chip">blame</span><span class="chip">convert</span></div>
+      <span class="eco-repo">github.com/sdcio/sdc-lite</span>
+    </div>
+  </div>
+  <p class="eco-foot small fragment" data-fragment-index="4">Install: release binaries or <code>install.sh</code> on each repo &nbsp;·&nbsp; docs: <b>docs.sdcio.dev</b></p>
+  <aside class="notes">
+    Three repos under github.com/sdcio — all open source (Nokia-initiated, CNCF Sandbox). This slide names the split; do not re-teach Config or deviations.
+    SDC (github.com/sdcio/sdc): the platform you have been describing — inventory CRDs, config-server, data-server, controllers. That is what runs when you helm/kustomize install SDC.
+    kubectl-sdc (github.com/sdcio/kubectl-sdc): binary kubectl-sdc, command kubectl sdc (not sdcio). Same kubeconfig/namespace/RBAC. Big picture for the room: SDC exposes resources through the Kubernetes API; kubectl get/yaml is enough for CR manifests, but operators live in subresources and plugin commands — synced running config (several output formats), blame tree, deviation list and manual revert when auto-heal does not apply. README lists blame, runningconfig, deviation, apply. Pick one example if someone asks; demo uses blame + deviation.
+    sdc-lite (github.com/sdcio/sdc-lite): local/CI YANG toolkit — validate, diff, convert, pipeline; no cluster. Complements SDC, does not replace the plugin.
+    One-liner split: cluster + devices = SDC; day-2 on that API = kubectl sdc; laptop/CI = sdc-lite.
+    Optional one-liners if asked: curl install scripts on each repo; go install paths in READMEs.
+    Hand over to Alexander: "We will use kubectl sdc in the demo; sdc-lite is there when you do not have a lab handy."
+    ~60–75 seconds.
   </aside>
 </section>
 
@@ -1617,11 +1825,11 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
     <li>Change the device by hand: <code>deviation</code> and self-healing</li>
   </ol>
   <aside class="notes">
-    HANDOVER from Markus (end of the blame slide): "Markus showed the pieces; Alexander now shows them working together." Alexander drives the demo; Markus can stay on stage for questions about SDC internals.
+    HANDOVER from Markus (end of the ecosystem slide): "Markus mapped the CRDs and the tooling around them; Alexander now shows kubectl sdc on a live cluster." Alexander drives the demo; Markus can stay on stage for questions about SDC internals.
     Show this "what you will see" list first (4 lines), then switch to the terminal. Terminal font >= 24pt. Time-box: 4 minutes.
     Flow:
     1. kubectl get target - device is up (created implicitly by discovery rule + profiles); device already has some brownfield config.
-    2. kubectl sdc runningconfig --target T --format xpath | grep interface (starting point, same as the opener; runningconfig has no path filter, so trim with grep)
+    2. kubectl sdc runningconfig --target T --format xpath | grep interface (baseline on the device; runningconfig has no path filter, so trim with grep)
     3. kubectl apply two Configs with different priorities (overlapping leaf)
     4. kubectl sdc blame --target T --filter-path "*/interface/*" (also --filter-owner, --filter-leaf, --filter-deviation; ANDed). Now blame is interesting: leaves owned by different Configs, one overruled, brownfield leaves owned by 'running'.
     5. On the device, change svc-a bandwidth manually.
@@ -1727,20 +1935,6 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
   </aside>
 </section>
 
-<!-- ============================================================ TAKE-AWAYS -->
-<section data-sec="Wrap-up" data-who="Alexander">
-  <h2>Take-aways</h2>
-  <ol class="steps tk">
-    <li class="fragment"><span class="step">1</span><b>Network function configuration can be a Kubernetes resource</b><span class="sub">YANG is the bridge between the network world and the Kubernetes world</span></li>
-    <li class="fragment"><span class="step">2</span><b>Intent + control loop = validated, reconciled, observable</b><span class="sub">schema validation up front, deviations and blame afterwards</span></li>
-    <li class="fragment"><span class="step">3</span><b>Open source and vendor agnostic: try it today</b><span class="sub">SDC is a CNCF Sandbox project, give it your YANG models</span></li>
-  </ol>
-  <aside class="notes">
-    Three sentences the audience should walk out with. Tie each one back to a slide: 1 = the network function vs. kubectl gap (problem section, "Joining the Worlds"); 2 = priority, deviations, blame and the demo; 3 = next slide.
-    This slide is also the natural place to cut or extend when the talk gets a shorter or longer time slot.
-  </aside>
-</section>
-
 <!-- ============================================================ 11. TRY IT -->
 <section data-sec="Wrap-up" data-who="Alexander">
   <h2>Try it</h2>
@@ -1749,7 +1943,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
       <p style="font-size:1.3em; margin:0 0 .3em"><b>docs.sdcio.dev</b></p>
       <ul class="small">
         <li>Quick start &amp; lab</li>
-        <li>GitHub: <code>sdcio</code></li>
+        <li>GitHub: <code>sdcio/sdc</code>, <code>kubectl-sdc</code>, <code>sdc-lite</code></li>
         <li>Discord for news and questions</li>
         <li>Community meetup, Mondays 08:30 CET</li>
       </ul>
