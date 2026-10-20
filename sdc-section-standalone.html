@@ -710,6 +710,27 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   .eco-repo { display: block; margin-top: .5em; font-family: var(--font-mono); font-size: .52em; color: #64748b; line-height: 1.25; word-break: break-all; }
   .eco-foot { text-align: center; margin-top: .75em; color: #334155; }
 
+  /* demo splash — same visual language as protocol / eco cards */
+  .reveal section.demo-splash { text-align: center; }
+  .demo-hero {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 460px; margin-top: 1.8em;
+  }
+  .demo-panel {
+    min-width: min(520px, 72vw); padding: 1.35em 2.8em 1.45em;
+    border: 2px solid #c9d6f5; border-top: 6px solid var(--blue); border-radius: 18px;
+    background: linear-gradient(180deg, #f4f7ff 0%, #fff 48%);
+    box-shadow: 0 8px 28px rgba(30,64,175,.1);
+  }
+  .demo-title {
+    margin: 0; font-size: 2.6em; font-weight: 700; line-height: 1.1;
+    color: #1e3a8a; letter-spacing: .02em;
+  }
+  .demo-rule {
+    display: block; width: 3.5em; height: 3px; margin: .85em auto 0;
+    border-radius: 2px; background: var(--blue); opacity: .35;
+  }
+
   /* operators slide */
   .op-wrap { display: flex; align-items: center; gap: 1.1em; margin-top: .2em; }
   .op-copy { flex: 0 0 47%; }
@@ -952,9 +973,9 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
 <pre><code class="language-bash" data-trim data-noescape>$ kubectl apply -f app.yaml
 deployment.apps/app created</code></pre>
       <ul class="cfg-points">
-        <li class="fragment"><b>Desired state</b> is declared; Kubernetes makes it so</li>
-        <li class="fragment">Configuration = <b>ConfigMap + Secret</b>, mounted into the pod</li>
-        <li class="fragment">Same tool, same workflow for <b>every</b> app</li>
+        <li class="fragment">Desired state is declared. Kubernetes ensures it is maintained</li>
+        <li class="fragment">Configuration = ConfigMap + Secret, mounted into the pod</li>
+        <li class="fragment">Familiar workflow for every app</li>
       </ul>
       <span class="cfg-tag ok fragment">&#10003; fully declarative</span>
     </div>
@@ -983,10 +1004,10 @@ deployment.apps/app created</code></pre>
 <pre><code class="language-bash" data-trim data-noescape>$ kubectl apply -f db.yaml   # the pod
 $ psql -c "CREATE DATABASE orders"</code></pre>
       <ul class="cfg-points">
-        <li class="fragment">The deployment is declarative, but <b>creating the database</b> is a call into the running service</li>
-        <li class="fragment">Operators close the gap: the database becomes <b>a custom resource</b></li>
+        <li class="fragment">The deployment is declarative, but creating the database is a manual day-1 step</li>
+        <li class="fragment">Operators can perform the imperative steps: the database becomes a custom resource</li>
       </ul>
-      <span class="cfg-tag warn fragment">&#9888; works, once an operator exists</span>
+      <span class="cfg-tag warn fragment">&#9888; possible, operator is helpful</span>
     </div>
     <div class="cfg-diagram">
       <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Database: same stack plus an imperative CREATE DATABASE call into the service">
@@ -1018,9 +1039,9 @@ $ psql -c "CREATE DATABASE orders"</code></pre>
 $ ssh -s upf netconf       # the config
 &lt;edit-config&gt;...&lt;/edit-config&gt;</code></pre>
       <ul class="cfg-points bad-list">
-        <li class="fragment">Helm deploys the pod; the real config sits behind <b>NETCONF</b> and YANG</li>
-        <li class="fragment"><b>Imperative</b>, session-based RPCs, per instance</li>
-        <li class="fragment">No desired state, no reconcile loop, <b>no kubectl</b></li>
+        <li class="fragment">Helm deploys the pod, the running config sits behind NETCONF and YANG</li>
+        <li class="fragment">Imperative RPCs, needed per instance</li>
+        <li class="fragment">No desired state, no reconcile loop, no familiar cloud-native tooling</li>
       </ul>
       <span class="cfg-tag bad fragment">&#10007; not cloud-native, yet</span>
     </div>
@@ -1055,7 +1076,7 @@ $ ssh -s upf netconf       # the config
         <li class="fragment"><b>One-shot:</b> the pipeline pushes once and moves on</li>
         <li class="fragment"><b>Slow iterations:</b> every change goes through the pipeline</li>
         <li class="fragment"><b>No monitoring:</b> nobody watches the result</li>
-        <li class="fragment">Traceability <b>or</b> a holistic view, not both</li>
+        <li class="fragment">Decide between multiple sources for auditability and traceability, or one large source for a holistic view</li>
       </ul>
     </div>
     <div class="cfg-diagram">
@@ -1122,7 +1143,7 @@ $ ssh -s upf netconf       # the config
       <span class="krm-code">watch &rarr; compare &rarr; act</span>
     </div>
   </div>
-  <p class="krm-foot fragment" data-fragment-index="4">Same API, same tooling (<b>kubectl</b>, RBAC, GitOps) for <b>anything</b> you can model.</p>
+  <p class="krm-foot fragment" data-fragment-index="4">Same API, same tooling (kubectl, RBAC, GitOps) for anything you can model.</p>
   <aside class="notes">
     KRM in three beats, left to right: a CRD extends the Kubernetes API with a new kind; a CR is an instance of that kind (just YAML, applied like any other object); an operator or controller adds the business logic that watches the resource and acts on it. The point for this talk: once something is a resource, it gets kubectl, RBAC, GitOps and the control loop for free. Next: that is exactly what we want for network function configuration.
     Example names (Config, upf-config) are illustrative; the SDC part later uses the real kind (Config, config.sdcio.dev).
@@ -1217,7 +1238,7 @@ $ ssh -s upf netconf       # the config
 </section>
 
 <!-- ============================================================ YANG -->
-<section data-sec="Building blocks" data-who="Alexander">
+<section data-sec="Building blocks" data-who="Alexander" data-visibility="hidden">
   <h2>YANG &ndash; Network Function Schema</h2>
   <div class="yg-row">
     <div class="yg-panel">
@@ -1314,7 +1335,7 @@ $ ssh -s upf netconf       # the config
 metadata:
   name: new-interface
   labels:
-    <span class="ha hl-fr fragment custom" data-fragment-index="1">config.sdcio.dev/targetName: demo-device</span>
+    <span class="ha hl-fr fragment custom" data-fragment-index="1">config.sdcio.dev/targetName: demo</span>
 spec:
   <span class="hb hl-fr fragment custom" data-fragment-index="2">priority: 90</span>
   <span class="hc hl-fr fragment custom" data-fragment-index="3">lifecycle:</span>
@@ -1323,8 +1344,11 @@ spec:
   <span class="hd hl-fr fragment custom" data-fragment-index="5">config:</span>
   <span class="hd hl-fr fragment custom" data-fragment-index="5">- path: /</span>
     <span class="hd hl-fr fragment custom" data-fragment-index="5">value:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="5">network:</span>
       <span class="hd hl-fr fragment custom" data-fragment-index="5">interface:</span>
       <span class="hd hl-fr fragment custom" data-fragment-index="5">- name: eth1</span>
+        <span class="hd hl-fr fragment custom" data-fragment-index="5">type: loopback</span>
+        <span class="hd hl-fr fragment custom" data-fragment-index="5">ipv4-enabled: true</span>
         <span class="hd hl-fr fragment custom" data-fragment-index="5">ipv4-address: [10.10.10.10]</span></code></pre>
     </div>
     <div style="flex:.9">
@@ -1338,7 +1362,7 @@ spec:
     </div>
   </div>
   <aside class="notes">
-    Bridge from handover: SDC discovers each device and creates a Target CR—you do not apply a Target yourself. Your Config only points at it via the targetName label (demo-device in the deck).
+    Bridge from handover: SDC discovers each device and creates a Target CR—you do not apply a Target yourself. Your Config only points at it via the targetName label (demo in the deck; namespace demo → blame shows demo.demo).
     Key idea: you do NOT write the whole device config. Each Config is a snippet, so different teams/systems own different parts. That is why we need priority on the next slide.
     Same workflow as a Deployment: kubectl apply or GitOps on this YAML (config.sdcio.dev). We name the rest of the CRDs after you have seen merge, drift, and blame.
     Fragments colour-match the code. apiVersion/namespace left out to fit; show the full YAML as backup or in the demo.
@@ -1442,13 +1466,13 @@ spec:
         <div class="pz-card p100" style="margin-left:0">
           <span class="pz-name">initial-config<span class="pz-who">Platform &middot; baseline</span></span>
           <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">192.0.2.10</span>
-          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/mtu</span><span class="pz-val" style="grid-column:3; grid-row:2">9000</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/speed</span><span class="pz-val" style="grid-column:3; grid-row:2">10G</span>
           <span class="pz-prio"><small>prio</small>100</span>
         </div>
         <div class="pz-card p50 fragment" data-fragment-index="1" style="margin-left:0">
           <span class="pz-name">overlap-config<span class="pz-who">Ops &middot; temp override</span></span>
           <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">20.20.20.20</span>
-          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/description</span><span class="pz-val" style="grid-column:3; grid-row:2">uplink</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/admin-up</span><span class="pz-val" style="grid-column:3; grid-row:2">true</span>
           <span class="pz-prio"><small>prio</small>50</span>
           <span class="pz-del fragment" data-fragment-index="3"></span>
         </div>
@@ -1468,14 +1492,14 @@ spec:
           </span>
         </div>
         <div class="pz-line">
-          <span class="p">/network/interface[name=eth0]/mtu</span>
-          <span class="v"><span>9000</span></span>
+          <span class="p">/network/interface[name=eth0]/speed</span>
+          <span class="v"><span>10G</span></span>
           <span class="t"><span>prio 100</span></span>
         </div>
         <div class="fragment" data-fragment-index="1">
           <div class="pz-line fragment fade-out" data-fragment-index="3">
-            <span class="p">/network/interface[name=eth0]/description</span>
-            <span class="v"><span>uplink</span></span>
+            <span class="p">/network/interface[name=eth0]/admin-up</span>
+            <span class="v"><span>true</span></span>
             <span class="t"><span>prio 50</span></span>
           </div>
         </div>
@@ -1489,9 +1513,9 @@ spec:
   </div>
   <aside class="notes">
     After the journey diagram: a story, not an abstraction: three owners with different roles; priority expresses who is allowed to win. Rule: lower number = higher precedence (docs: priority is a tie-breaker when Configs overlap). Say it out loud.
-    Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address 192.0.2.10 and mtu 9000. 2. Ops put a temporary override with prio 50: it sets the SAME leaf ipv4-address (20.20.20.20, wins because 50 beats 100) and a NEW leaf description (uplink). 3. Merged result: ipv4-address from the override, mtu from the baseline, description from the override: different leaves never compete, they are simply merged. 4. Delete the override: ipv4-address falls back to 192.0.2.10 and description goes away: the lower-priority intent was never lost.
+    Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address 192.0.2.10 and speed 10G (ethernet in the demo YANG model device-networking). 2. Ops put a temporary override with prio 50: it sets the SAME leaf ipv4-address (20.20.20.20, wins because 50 beats 100) and a NEW leaf admin-up (true). 3. Merged result: ipv4-address from the override, speed from the baseline, admin-up from the override: different leaves never compete, they are simply merged. 4. Delete the override: ipv4-address falls back to 192.0.2.10 and admin-up falls back to default false: the lower-priority intent was never lost.
     The best demo of why this matters is the last bullet: the lower-priority intent is still stored, so removing the override restores it automatically. (With deletionPolicy delete, removing overlap-config also removes its values from the device; the baseline value then takes over.)
-    Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root node 'network' in this example model; use your real model's paths). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address of eth0). Setting different leaves, even under the same list entry, just merges.
+    Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root container network in the demo model urn:demo:device-networking). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address on eth0). Setting different leaves, even under the same list entry, just merges. Off-slide: baseline also sets type ethernet and ipv4-enabled so YANG must rules pass.
     Same Configs as in the blame slide (initial-config, new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
     Briefly: ConfigSet exists for 'same snippet on many targets'; not needed here.
   </aside>
@@ -1664,10 +1688,10 @@ spec:
   <h2>When the device drifts</h2>
 <pre style="font-size:.66em"><code data-trim data-noescape><span class="hl-static">kind: Deviation</span>
 metadata:
-  name: device01-baseconfig
+  name: demo-initial-config
 spec:
   deviations:
-  - path: network/service[name=svc-a]/bandwidth
+  - path: network/service[name=svc-b]/bandwidth
     desiredValue: 5000
     actualValue: 100
     <span class="dv-line fragment custom" data-fragment-index="1">reason: NOT_APPLIED</span></code></pre>
@@ -1681,11 +1705,11 @@ spec:
   </table>
   <aside class="notes">
     Title ties back to the Config slide ("what if it drifts"): drift = running config no longer matches intent; SDC records it as a Deviation with a reason.
-    Point at metadata.name device01-baseconfig: one Deviation per device per intent — same pairing as a rolled-out Config (device + intent in the name). Brownfield on device01 is a separate target-type Deviation. API prefix config-/target- if someone asks (deviation_helper.go).
+    Point at metadata.name demo-initial-config: one Deviation per Config CR (target demo + intent initial-config). Brownfield on the same target is a separate Target-level Deviation. API prefix config-/target- if someone asks (deviation_helper.go).
     Concrete example for each reason:
-    - NOT_APPLIED: someone changed svc-a bandwidth on the device to 100.
+    - NOT_APPLIED: someone changed svc-b bandwidth on the device to 100 (intent from initial-config still wants 5000).
     - OVERRULED: eth0 ipv4 from new-interface vs overlap-config (previous slide).
-    - UNHANDLED: a loopback someone configured by hand.
+    - UNHANDLED: brownfield service svc-c (bandwidth 500) or a loopback someone configured by hand.
     What SDC does (verified in docs):
     - NOT_APPLIED: always reported (same column as OVERRULED/UNHANDLED). Non-revertive: SDC does not re-push; accept drift with kubectl sdc deviation --revert, or change the Config.
     - NOT_APPLIED + revertive: exception on the slide sub-line — SDC re-applies the Config and the deviation goes away ("self-healing").
@@ -1701,17 +1725,19 @@ spec:
   <div class="fragment" data-fragment-index="1">
   <p class="small" style="margin:0 0 .1em"><b>running</b> + <b>intended</b> + <b>deviation</b> in one tree, each value tagged with its <b>owner</b></p>
   <p class="tiny" style="margin:0 0 .4em"><i>Config Blame is to Config apply what Git Blame is to commit.</i></p>
-<pre class="blame" style="font-size:.68em; margin:0"><code data-trim data-noescape>$ kubectl sdc blame --target demo-device
-                 -----  │ 🎯 demo.demo-device
+<pre class="blame" style="font-size:.68em; margin:0"><code data-trim data-noescape>$ kubectl sdc blame --target demo
+                 -----  │ 🎯 demo.demo
                  -----  │ └── 📦 network
                  -----  │     ├── 📦 interface
                  -----  │     │   ├── 🔑 name=eth0
-   demo.initial-config  │     │   │   ├── 🍃 admin-up -> true
+   demo.initial-config  │     │   │   ├── 🍃 speed -> 10G
+   demo.overlap-config  │     │   │   ├── 🍃 admin-up -> true
    demo.overlap-config  │     │   │   └── 🍃 ipv4-address -> 20.20.20.20
                  -----  │     │   └── 🔑 name=eth1
+    demo.new-interface  │     │       ├── 🍃 ipv4-enabled -> true
     demo.new-interface  │     │       └── 🍃 ipv4-address -> 10.10.10.10
                  -----  │     └── 📦 service
-                 -----  │         ├── 🔑 name=svc-a
+                 -----  │         ├── 🔑 name=svc-b
 demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃 bandwidth <span class="hl">-> 100 [~> 5000]</span>
                  -----  │         └── 🔑 name=svc-c
                running  │             └── 🍃 bandwidth -> 500</code></pre>
@@ -1721,7 +1747,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
     What blame IS: a single view that combines the RUNNING config (what is on the device), the INTENDED config (what the Configs want) and the DEVIATIONS (where they differ), as a tree, and tags each leaf with the source of the highest-precedence value (a Config, 'default', or 'running' if no Config owns it). So it answers three questions at once: what is on the device, who put it there, and does it match the intent. That is why a deviated leaf shows 'actual [~> expected]' and a (*) next to its owner. It also shows the other half of the priority story: the OVERRULED leaf (eth0 ipv4) is attributed to the winning Config.
     The output is a TREE (the config is a tree, blame shows it as one) with the owner in a left column, same layout as the kubectl-sdc README (default format 'tree'; --format xpath gives one line per leaf). The tree below is illustrative and modelled on the README: replace it with real output and RE-CHECK the exact markers (icons, '(*)', '[~> expected]').
     Crop real output to the interesting subtree and use a big font; filter with e.g. --filter-path "*/service/*" or --filter-deviation to keep it to ~12 lines.
-    Highlight the svc-a line: the SAME deviation as the previous slide, now seen in the tree. Say it out loud.
+    Highlight the svc-b line: the SAME deviation as the previous slide, now seen in the tree. Target header is namespace.target (demo.demo). Say it out loud.
     Source column: a Config name (namespace.name), 'default' (schema default), or 'running' (on the device, no Config owns it).
     Notation: the value after '->' is ALWAYS what is running on the device; the intended value is in the brackets. Since Sept 2025 (sdc-protos commit "BlameTreeElement: Change the rendering of a deviated running") it is '-> actual [~> expected]'; it used to be 'expected [-> actual]'. The commit text was garbled, so CHECK the exact glyph (~> or ->) in real output, and RE-TAKE any old screenshot (also: old screenshot says 'kubectl sdcio', the plugin is 'kubectl sdc').
     Tips: --filter-deviation shows only deviated leaves; --filter-owner running shows brownfield only; --filter-path "*/interface/*"; filters are ANDed; --format xpath and --interactive exist.
@@ -1829,23 +1855,22 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
 </section>
 
 <!-- ============================================================ 8. DEMO -->
-<section data-sec="Demo" data-who="Alexander">
-  <h2>Demo</h2>
-  <ol class="small">
-    <li>Device is up: <code>Target</code> created by discovery</li>
-    <li>Apply two intents with different priorities</li>
-    <li>Who owns what? <code>blame</code></li>
-    <li>Change the device by hand: <code>deviation</code> and self-healing</li>
-  </ol>
+<section data-sec="Demo" data-who="Alexander" class="demo-splash">
+  <div class="demo-hero" aria-label="Demo">
+    <div class="demo-panel">
+      <p class="demo-title">Demo</p>
+      <span class="demo-rule" aria-hidden="true"></span>
+    </div>
+  </div>
   <aside class="notes">
     HANDOVER from Markus (end of the ecosystem slide): "Markus mapped the CRDs and the tooling around them; Alexander now shows kubectl sdc on a live cluster." Alexander drives the demo; Markus can stay on stage for questions about SDC internals.
-    Show this "what you will see" list first (4 lines), then switch to the terminal. Terminal font >= 24pt. Time-box: 4 minutes.
+    Slide is a visual handoff only — switch straight to the terminal. Terminal font >= 24pt. Time-box: 4 minutes.
     Flow:
     1. kubectl get target - device is up (created implicitly by discovery rule + profiles); device already has some brownfield config.
     2. kubectl sdc runningconfig --target T --format xpath | grep interface (baseline on the device; runningconfig has no path filter, so trim with grep)
     3. kubectl apply two Configs with different priorities (overlapping leaf)
     4. kubectl sdc blame --target T --filter-path "*/interface/*" (also --filter-owner, --filter-leaf, --filter-deviation; ANDed). Now blame is interesting: leaves owned by different Configs, one overruled, brownfield leaves owned by 'running'.
-    5. On the device, change svc-a bandwidth manually.
+    5. On the device, change svc-b bandwidth manually.
     6. kubectl sdc deviation --target T - drift appears; if revertive it is reverted: show it disappear. Non-revertive: kubectl sdc deviation --target T --revert (or --interactive to pick, or --format resource-yaml to emit a TargetClearDeviation for 'kubectl sdc apply -f').
     FALLBACK: recorded video ready; switch after 15 seconds of trouble.
   </aside>
@@ -1940,7 +1965,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
   <ul>
     <li class="fragment"><b>Less toil</b>: describe intent, not commands</li>
     <li class="fragment"><b>Reliability</b>: drift detected and corrected</li>
-    <li class="fragment"><b>Visibility</b>: running state, deviations, provenance</li>
+    <li class="fragment"><b>Visibility</b>: running state, deviations, source</li>
     <li class="fragment"><b>Scale</b>: composition by priority and ConfigSets, not copy/paste</li>
   </ul>
   <aside class="notes">
@@ -1956,7 +1981,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
       <p style="font-size:1.3em; margin:0 0 .3em"><b>docs.sdcio.dev</b></p>
       <ul class="small">
         <li>Quick start &amp; lab</li>
-        <li>GitHub: <a href="https://github.com/sdcio">github.com/sdcio</a> (<code>kubectl-sdc</code>, <code>sdc-lite</code>, …)</li>
+        <li>GitHub: <a href="https://github.com/sdcio">github.com/sdcio</a></li>
         <li>Discord for news and questions</li>
         <li>Community meetup, Mondays 08:30 CET</li>
       </ul>
