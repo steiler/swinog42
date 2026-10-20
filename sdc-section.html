@@ -549,9 +549,9 @@
 <pre><code class="language-bash" data-trim data-noescape>$ kubectl apply -f app.yaml
 deployment.apps/app created</code></pre>
       <ul class="cfg-points">
-        <li class="fragment"><b>Desired state</b> is declared; Kubernetes makes it so</li>
-        <li class="fragment">Configuration = <b>ConfigMap + Secret</b>, mounted into the pod</li>
-        <li class="fragment">Same tool, same workflow for <b>every</b> app</li>
+        <li class="fragment">Desired state is declared. Kubernetes ensures it is maintained</li>
+        <li class="fragment">Configuration = ConfigMap + Secret, mounted into the pod</li>
+        <li class="fragment">Familiar workflow for every app</li>
       </ul>
       <span class="cfg-tag ok fragment">&#10003; fully declarative</span>
     </div>
@@ -580,10 +580,10 @@ deployment.apps/app created</code></pre>
 <pre><code class="language-bash" data-trim data-noescape>$ kubectl apply -f db.yaml   # the pod
 $ psql -c "CREATE DATABASE orders"</code></pre>
       <ul class="cfg-points">
-        <li class="fragment">The deployment is declarative, but <b>creating the database</b> is a call into the running service</li>
-        <li class="fragment">Operators close the gap: the database becomes <b>a custom resource</b></li>
+        <li class="fragment">The deployment is declarative, but creating the database is a manual day-1 step</li>
+        <li class="fragment">Operators can perform the imperative steps: the database becomes a custom resource</li>
       </ul>
-      <span class="cfg-tag warn fragment">&#9888; works, once an operator exists</span>
+      <span class="cfg-tag warn fragment">&#9888; possible, operator is helpful</span>
     </div>
     <div class="cfg-diagram">
       <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Database: same stack plus an imperative CREATE DATABASE call into the service">
@@ -615,9 +615,9 @@ $ psql -c "CREATE DATABASE orders"</code></pre>
 $ ssh -s upf netconf       # the config
 &lt;edit-config&gt;...&lt;/edit-config&gt;</code></pre>
       <ul class="cfg-points bad-list">
-        <li class="fragment">Helm deploys the pod; the real config sits behind <b>NETCONF</b> and YANG</li>
-        <li class="fragment"><b>Imperative</b>, session-based RPCs, per instance</li>
-        <li class="fragment">No desired state, no reconcile loop, <b>no kubectl</b></li>
+        <li class="fragment">Helm deploys the pod, the running config sits behind NETCONF and YANG</li>
+        <li class="fragment">Imperative RPCs, needed per instance</li>
+        <li class="fragment">No desired state, no reconcile loop, no familiar cloud-native tooling</li>
       </ul>
       <span class="cfg-tag bad fragment">&#10007; not cloud-native, yet</span>
     </div>
@@ -652,7 +652,7 @@ $ ssh -s upf netconf       # the config
         <li class="fragment"><b>One-shot:</b> the pipeline pushes once and moves on</li>
         <li class="fragment"><b>Slow iterations:</b> every change goes through the pipeline</li>
         <li class="fragment"><b>No monitoring:</b> nobody watches the result</li>
-        <li class="fragment">Traceability <b>or</b> a holistic view, not both</li>
+        <li class="fragment">Decide between multiple sources for auditability and traceability, or one large source for a holistic view</li>
       </ul>
     </div>
     <div class="cfg-diagram">
@@ -719,7 +719,7 @@ $ ssh -s upf netconf       # the config
       <span class="krm-code">watch &rarr; compare &rarr; act</span>
     </div>
   </div>
-  <p class="krm-foot fragment" data-fragment-index="4">Same API, same tooling (<b>kubectl</b>, RBAC, GitOps) for <b>anything</b> you can model.</p>
+  <p class="krm-foot fragment" data-fragment-index="4">Same API, same tooling (kubectl, RBAC, GitOps) for anything you can model.</p>
   <aside class="notes">
     KRM in three beats, left to right: a CRD extends the Kubernetes API with a new kind; a CR is an instance of that kind (just YAML, applied like any other object); an operator or controller adds the business logic that watches the resource and acts on it. The point for this talk: once something is a resource, it gets kubectl, RBAC, GitOps and the control loop for free. Next: that is exactly what we want for network function configuration.
     Example names (Config, upf-config) are illustrative; the SDC part later uses the real kind (Config, config.sdcio.dev).
