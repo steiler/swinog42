@@ -20,7 +20,7 @@
   .reveal h2 { font-size: 1.3em; line-height: 1.15; margin: 0 0 .5em; }
   .reveal section { text-align: left; }
   /* slides start below the fixed header band and are top-aligned (see Reveal config: center:false) */
-  .reveal .slides > section { box-sizing: border-box; padding-top: 92px; }
+  .reveal .slides > section { box-sizing: border-box; padding-top: 76px; }
   .reveal pre { width: 100%; box-shadow: none; font-size: .66em; }
   .reveal pre code { max-height: none; padding: .7em 1em; background: #f6f8fa; border-radius: 8px; }
   .reveal code { font-family: var(--font-mono); }
@@ -193,7 +193,7 @@
   .pz-rule b { color: var(--blue); }
 
   /* title slide */
-  .reveal .slides section.title-slide { text-align: center; padding-top: 150px; }
+  .reveal .slides section.title-slide { text-align: center; padding-top: 128px; }
   .reveal .slides section.title-slide h1 {
     font-size: 1.28em; line-height: 1.2; max-width: 92%; margin: 0 auto; font-weight: 700;
   }
@@ -360,22 +360,24 @@
      so it scales with the 1280x720 canvas at any window size / projector resolution and also shows up in PDF export. */
   .deck-chrome {
     position: absolute; z-index: 40; left: 0; right: 0; top: 0;
-    height: 76px; padding: 6px 40px;
-    display: flex; align-items: center; gap: 24px;
+    height: 58px; padding: 4px 40px;
+    display: flex; align-items: center; gap: 20px;
     pointer-events: none; box-sizing: border-box;
   }
   .deck-chrome::after {
     content: ''; position: absolute; left: 40px; right: 40px; bottom: 0; height: 1px;
     background: linear-gradient(90deg, #cbd5e1 0%, #e2e8f0 45%, transparent 100%);
   }
-  .deck-brand { display: flex; align-items: center; gap: 10px; color: #1e3a8a; }
-  .deck-logo { height: 62px; width: auto; display: block; }
-  .deck-section { display: inline-flex; align-items: center; gap: .6em; font-size: 20px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #1e3a8a; background: #eef3ff; border: 2px solid #c9d6f5; border-radius: 999px; padding: 4px 16px; transition: opacity .2s; }
+  .deck-brand { display: flex; align-items: center; gap: 8px; color: #1e3a8a; }
+  /* SDC-logo.svg is stacked (mark + letters); show mark only in the header */
+  .deck-mark { flex: none; display: block; line-height: 0; }
+  .deck-logo { height: 48px; width: auto; display: block; clip-path: inset(0 0 27% 0); }
+  .deck-section { display: inline-flex; align-items: center; gap: .6em; font-size: 18px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #1e3a8a; background: #eef3ff; border: 2px solid #c9d6f5; border-radius: 999px; padding: 4px 16px; transition: opacity .2s; }
   .deck-section[hidden] { display: none; }
   .deck-section .who { font-weight: 600; letter-spacing: .02em; text-transform: none; color: #475569; }
   .deck-section .who { display: none; }
   .deck-section .who::before { content: '\00b7'; margin-right: .6em; color: #94a3b8; }
-  .deck-venue { margin-left: auto; font-size: 18px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; }
+  .deck-venue { margin-left: auto; font-size: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; }
   .reveal .slide-number {
     font-family: inherit; font-size: 18px; font-weight: 600; color: #475569;
     background: rgba(255,255,255,.92); padding: 3px 14px; border-radius: 999px;
@@ -414,9 +416,9 @@
 <!-- slide header (logo, section marker, venue): cloned into every slide by the script at the bottom -->
 <template id="chrome-tpl">
   <header class="deck-chrome" aria-hidden="true">
-    <div class="deck-brand">
+    <div class="deck-brand" aria-label="SDC">
       <!-- https://github.com/sdcio/docs/tree/main/docs/assets/logos -->
-      <img class="deck-logo" src="assets/logos/SDC-logo.svg" width="627.5" height="770.5" alt="">
+      <span class="deck-mark"><img class="deck-logo" src="assets/logos/SDC-logo.svg" width="627.5" height="770.5" alt=""></span>
     </div>
     <span class="deck-section" hidden><span class="what"></span><span class="who"></span></span>
     <span class="deck-venue">SwiNOG #42</span>
@@ -528,7 +530,7 @@
           <rect x="52" y="368" width="14" height="22" rx="2"/><rect x="70" y="362" width="14" height="28" rx="2"/>
           <rect x="336" y="368" width="14" height="22" rx="2"/><rect x="354" y="362" width="14" height="28" rx="2"/>
         </g>
-        <text x="210" y="408" text-anchor="middle" font-size="13.5" font-weight="600" fill="#475569">Each hex ≈ one CNF workload (pod)</text>
+        <text x="210" y="408" text-anchor="middle" font-size="13.5" font-weight="600" fill="#475569">Each hex ≈ one CNF workload</text>
       </svg>
     </div>
   </div>
@@ -733,9 +735,9 @@ $ ssh -s upf netconf       # the config
     <div class="op-copy">
       <div class="op-label">The control loop</div>
       <div class="op-steps">
-        <div class="op-step fragment" data-fragment-index="1"><span class="n">1</span>Watches for changes</div>
-        <div class="op-step fragment" data-fragment-index="2"><span class="n">2</span>Performs action</div>
-        <div class="op-step fragment" data-fragment-index="3"><span class="n">3</span>Updates resources &#8635;</div>
+        <div class="op-step fragment" data-fragment-index="1"><span class="n">1</span>Watches (events)</div>
+        <div class="op-step fragment" data-fragment-index="2"><span class="n">2</span>Performs action &#8635;</div>
+        <div class="op-step fragment" data-fragment-index="3"><span class="n">3</span>Updates resources (write)</div>
       </div>
       <div class="op-label fragment" data-fragment-index="4">Built-in</div>
       <div class="chips fragment" data-fragment-index="4"><span class="chip k8s">Deployment</span><span class="chip k8s">Job</span><span class="chip k8s">PersistentVolume</span></div>
@@ -761,11 +763,16 @@ $ ssh -s upf netconf       # the config
           <text x="265" y="183" font-weight="700" fill="#1e3a8a">Kube API</text>
           <path d="M240 290 V206" fill="none" stroke="#3b82f6" stroke-width="2" marker-end="url(#cfg-arr)"/>
           <path d="M300 206 V290" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#cfg-arr-green)"/>
-          <text x="230" y="254" font-size="15" fill="#475569" text-anchor="end">read/write</text>
-          <text x="310" y="254" font-size="15" fill="#047857" text-anchor="start">events</text>
+          <g font-size="13" font-weight="700">
+            <circle cx="198" cy="248" r="11" fill="#1a56db"/><text x="198" y="252" fill="#fff">3</text>
+            <text x="214" y="252" font-size="15" font-weight="600" fill="#475569" text-anchor="start">write</text>
+            <circle cx="292" cy="248" r="11" fill="#1a56db"/><text x="292" y="252" fill="#fff">1</text>
+            <text x="308" y="252" font-size="15" font-weight="600" fill="#047857" text-anchor="start">events</text>
+          </g>
           <rect x="200" y="292" width="130" height="68" rx="12" fill="#1a56db" stroke="#1e40af" stroke-width="2"/>
-          <text x="265" y="320" font-weight="700" fill="#fff">Operator</text>
-          <text x="265" y="347" font-size="24" fill="#fff">&#8635;</text>
+          <text x="265" y="318" font-weight="700" fill="#fff">Operator</text>
+          <circle cx="265" cy="342" r="12" fill="#fff"/><text x="265" y="346" font-size="14" font-weight="700" fill="#1a56db">2</text>
+          <text x="265" y="358" font-size="12" fill="#dbeafe">action</text>
         </g>
       </svg>
     </div>
