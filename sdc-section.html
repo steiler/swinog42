@@ -38,6 +38,7 @@
   .reveal .hl-fr.fragment.custom { opacity: 1; visibility: visible; }
   .reveal .hl-fr.fragment.custom:not(.visible) { background: transparent; }
   .ha { background: #ffe9a8; } .hb { background: #cdeedb; } .hc { background: #d6e4ff; } .hd { background: #f9d6e6; } .he { background: #ddd6fe; }
+  .hl-static { background: #e8eef5; padding: 0 .15em; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
   /* two worlds + bridge */
   .worlds { display:flex; align-items:center; justify-content:center; gap:0; margin-top:.8em; }
   .world { border:3px solid var(--blue); border-radius:18px; padding:.6em .9em; width:34%; background:#f4f7ff; text-align:center; }
@@ -901,7 +902,7 @@ $ ssh -s upf netconf       # the config
   <h2>Configuration as intent</h2>
   <div class="cols">
     <div style="flex:1.2">
-<pre style="font-size:.66em"><code data-trim data-noescape>kind: Config
+<pre style="font-size:.66em"><code data-trim data-noescape><span class="hl-static">kind: Config</span>
 metadata:
   name: new-interface
   labels:
@@ -933,69 +934,6 @@ spec:
     Key idea: you do NOT write the whole device config. Each Config is a snippet, so different teams/systems own different parts. That is why we need priority on the next slide.
     Same workflow as a Deployment: kubectl apply or GitOps on this YAML (config.sdcio.dev). We name the rest of the CRDs after you have seen merge, drift, and blame.
     Fragments colour-match the code. apiVersion/namespace left out to fit; show the full YAML as backup or in the demo.
-  </aside>
-</section>
-
-<section data-sec="Priority" data-who="Markus">
-  <h2>Intent resolution</h2>
-  <div class="pz">
-    <div class="pz-lane">
-      <div class="pz-stack">
-        <div class="pz-card p100" style="margin-left:0">
-          <span class="pz-name">initial-config<span class="pz-who">Platform &middot; baseline</span></span>
-          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">192.0.2.10</span>
-          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/mtu</span><span class="pz-val" style="grid-column:3; grid-row:2">9000</span>
-          <span class="pz-prio"><small>prio</small>100</span>
-        </div>
-        <div class="pz-card p50 fragment" data-fragment-index="1" style="margin-left:0">
-          <span class="pz-name">overlap-config<span class="pz-who">Ops &middot; temp override</span></span>
-          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">20.20.20.20</span>
-          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/description</span><span class="pz-val" style="grid-column:3; grid-row:2">uplink</span>
-          <span class="pz-prio"><small>prio</small>50</span>
-          <span class="pz-del fragment" data-fragment-index="3"></span>
-        </div>
-      </div>
-      <div class="pz-res pz-res2"><span class="k">device (merged result)</span>
-        <div class="pz-line">
-          <span class="p">/network/interface[name=eth0]/ipv4-address</span>
-          <span class="v">
-            <span class="fragment fade-out" data-fragment-index="1">192.0.2.10</span>
-            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3"><span class="new">20.20.20.20</span></span></span>
-            <span class="fragment" data-fragment-index="3">192.0.2.10</span>
-          </span>
-          <span class="t">
-            <span class="fragment fade-out" data-fragment-index="1">prio 100</span>
-            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3">prio 50 wins</span></span>
-            <span class="fragment" data-fragment-index="3">prio 100</span>
-          </span>
-        </div>
-        <div class="pz-line">
-          <span class="p">/network/interface[name=eth0]/mtu</span>
-          <span class="v"><span>9000</span></span>
-          <span class="t"><span>prio 100</span></span>
-        </div>
-        <div class="fragment" data-fragment-index="1">
-          <div class="pz-line fragment fade-out" data-fragment-index="3">
-            <span class="p">/network/interface[name=eth0]/description</span>
-            <span class="v"><span>uplink</span></span>
-            <span class="t"><span>prio 50</span></span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="pz-rule">
-    <p class="fragment" data-fragment-index="1" style="margin:0 0 .2em">The <b>lower</b> the priority number, the <b>higher</b> the precedence.</p>
-    <p class="fragment" data-fragment-index="2" style="margin:0 0 .2em">Without competition, the result is simply a <b>merge</b> of all intents.</p>
-    <p class="fragment" data-fragment-index="3" style="margin:0">Delete <code>overlap-config</code>: back to <code>192.0.2.10</code>, nothing was lost.</p>
-  </div>
-  <aside class="notes">
-    A story, not an abstraction: three owners with different roles; priority expresses who is allowed to win. Rule: lower number = higher precedence (docs: priority is a tie-breaker when Configs overlap). Say it out loud.
-    Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address 192.0.2.10 and mtu 9000. 2. Ops put a temporary override with prio 50: it sets the SAME leaf ipv4-address (20.20.20.20, wins because 50 beats 100) and a NEW leaf description (uplink). 3. Merged result: ipv4-address from the override, mtu from the baseline, description from the override: different leaves never compete, they are simply merged. 4. Delete the override: ipv4-address falls back to 192.0.2.10 and description goes away: the lower-priority intent was never lost.
-    The best demo of why this matters is the last bullet: the lower-priority intent is still stored, so removing the override restores it automatically. (With deletionPolicy delete, removing overlap-config also removes its values from the device; the baseline value then takes over.)
-    Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root node 'network' in this example model; use your real model's paths). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address of eth0). Setting different leaves, even under the same list entry, just merges.
-    Same Configs as in the blame slide (initial-config, new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
-    Briefly: ConfigSet exists for 'same snippet on many targets'; not needed here.
   </aside>
 </section>
 
@@ -1075,7 +1013,7 @@ spec:
   </svg>
   <aside class="notes">
     High-level gain: SDC does not forward your Config. It builds ONE tree per device from three inputs (all intents with their priorities, the device's running config incl. brownfield, the YANG model), validates the WHOLE result, and pushes only the difference to the device.
-    This slide comes right after Priority: recap, do not re-teach it (about 60-90 s). Walk the diagram only: parallel inputs into 1 Merge, 2 Validate, then 3 Diff (what changed versus the device) and 4 Translate (turn the delta into the southbound format). Diff and translate are separate on purpose: the tree is complete before anything is computed or sent. Read-back loop sets up Deviations. No bottom bullets; detail stays in notes.
+    This slide comes right after the Config slide — before Intent resolution: recap, do not re-teach priority yet (about 60-90 s). Walk the diagram only: parallel inputs into 1 Merge, 2 Validate, then 3 Diff (what changed versus the device) and 4 Translate (turn the delta into the southbound format). Diff and translate are separate on purpose: the tree is complete before anything is computed or sent. Read-back loop sets up Deviations. No bottom bullets; detail stays in notes.
     Docs (system-architecture/data-server): candidate tree = deep copy of the synced (running) tree + all intents; same leaf set by several intents: lowest priority NUMBER wins; YANG validation; diff; only then the south-bound Set (confirmed commit with auto-rollback timer).
     Brownfield: stays in the tree as 'running' with the lowest precedence. No intent owns it, so it is reported as an UNHANDLED deviation; SDC does not remove it.
     Rollback: the push is a confirmed commit. If the transaction is not confirmed within the timeout, data-server re-runs the previous intent content and the device returns to its prior state.
@@ -1085,6 +1023,69 @@ spec:
     Kubernetes speaks resources; the device speaks YANG over the driver. No per-vendor CRDs in your cluster.
     Read-back (sync): subscriptions/polling keep the tree current; mismatch between winner and device = deviation.
     Backup slide after this one shows the real pods, only open it if asked.
+  </aside>
+</section>
+
+<section data-sec="Priority" data-who="Markus">
+  <h2>Intent resolution</h2>
+  <div class="pz">
+    <div class="pz-lane">
+      <div class="pz-stack">
+        <div class="pz-card p100" style="margin-left:0">
+          <span class="pz-name">initial-config<span class="pz-who">Platform &middot; baseline</span></span>
+          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">192.0.2.10</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/mtu</span><span class="pz-val" style="grid-column:3; grid-row:2">9000</span>
+          <span class="pz-prio"><small>prio</small>100</span>
+        </div>
+        <div class="pz-card p50 fragment" data-fragment-index="1" style="margin-left:0">
+          <span class="pz-name">overlap-config<span class="pz-who">Ops &middot; temp override</span></span>
+          <span class="pz-x" style="grid-column:2; grid-row:1">/network/interface[name=eth0]/ipv4-address</span><span class="pz-val" style="grid-column:3; grid-row:1">20.20.20.20</span>
+          <span class="pz-x" style="grid-column:2; grid-row:2">/network/interface[name=eth0]/description</span><span class="pz-val" style="grid-column:3; grid-row:2">uplink</span>
+          <span class="pz-prio"><small>prio</small>50</span>
+          <span class="pz-del fragment" data-fragment-index="3"></span>
+        </div>
+      </div>
+      <div class="pz-res pz-res2"><span class="k">device (merged result)</span>
+        <div class="pz-line">
+          <span class="p">/network/interface[name=eth0]/ipv4-address</span>
+          <span class="v">
+            <span class="fragment fade-out" data-fragment-index="1">192.0.2.10</span>
+            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3"><span class="new">20.20.20.20</span></span></span>
+            <span class="fragment" data-fragment-index="3">192.0.2.10</span>
+          </span>
+          <span class="t">
+            <span class="fragment fade-out" data-fragment-index="1">prio 100</span>
+            <span class="fragment" data-fragment-index="1"><span class="fragment fade-out" data-fragment-index="3">prio 50 wins</span></span>
+            <span class="fragment" data-fragment-index="3">prio 100</span>
+          </span>
+        </div>
+        <div class="pz-line">
+          <span class="p">/network/interface[name=eth0]/mtu</span>
+          <span class="v"><span>9000</span></span>
+          <span class="t"><span>prio 100</span></span>
+        </div>
+        <div class="fragment" data-fragment-index="1">
+          <div class="pz-line fragment fade-out" data-fragment-index="3">
+            <span class="p">/network/interface[name=eth0]/description</span>
+            <span class="v"><span>uplink</span></span>
+            <span class="t"><span>prio 50</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pz-rule">
+    <p class="fragment" data-fragment-index="1" style="margin:0 0 .2em">The <b>lower</b> the priority number, the <b>higher</b> the precedence.</p>
+    <p class="fragment" data-fragment-index="2" style="margin:0 0 .2em">Without competition, the result is simply a <b>merge</b> of all intents.</p>
+    <p class="fragment" data-fragment-index="3" style="margin:0">Delete <code>overlap-config</code>: back to <code>192.0.2.10</code>, nothing was lost.</p>
+  </div>
+  <aside class="notes">
+    After the journey diagram: a story, not an abstraction: three owners with different roles; priority expresses who is allowed to win. Rule: lower number = higher precedence (docs: priority is a tie-breaker when Configs overlap). Say it out loud.
+    Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address 192.0.2.10 and mtu 9000. 2. Ops put a temporary override with prio 50: it sets the SAME leaf ipv4-address (20.20.20.20, wins because 50 beats 100) and a NEW leaf description (uplink). 3. Merged result: ipv4-address from the override, mtu from the baseline, description from the override: different leaves never compete, they are simply merged. 4. Delete the override: ipv4-address falls back to 192.0.2.10 and description goes away: the lower-priority intent was never lost.
+    The best demo of why this matters is the last bullet: the lower-priority intent is still stored, so removing the override restores it automatically. (With deletionPolicy delete, removing overlap-config also removes its values from the device; the baseline value then takes over.)
+    Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root node 'network' in this example model; use your real model's paths). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address of eth0). Setting different leaves, even under the same list entry, just merges.
+    Same Configs as in the blame slide (initial-config, new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
+    Briefly: ConfigSet exists for 'same snippet on many targets'; not needed here.
   </aside>
 </section>
 
@@ -1252,8 +1253,10 @@ spec:
 
 <!-- ============================================================ 6. DEVIATIONS -->
 <section data-sec="Deviations" data-who="Markus">
-  <h2>When the device disagrees</h2>
-<pre><code data-trim data-noescape>kind: Deviation
+  <h2>When the device drifts</h2>
+<pre style="font-size:.66em"><code data-trim data-noescape><span class="hl-static">kind: Deviation</span>
+metadata:
+  name: device01-baseconfig
 spec:
   deviations:
   - path: network/service[name=svc-a]/bandwidth
@@ -1263,20 +1266,21 @@ spec:
   <table class="dv-table">
     <thead><tr><th>Reason</th><th>Meaning</th><th>SDC does</th></tr></thead>
     <tbody>
-      <tr class="fragment na" data-fragment-index="1"><td><span class="dv-badge">NOT_APPLIED</span></td><td>intended value is not on the device</td><td><span class="dv-act fix">revertive: re-applies</span><span class="dv-sub">non-revertive: you clear it</span></td></tr>
+      <tr class="fragment na" data-fragment-index="1"><td><span class="dv-badge">NOT_APPLIED</span></td><td>intended value is not on the device</td><td><span class="dv-act">reports only</span><span class="dv-sub">revertive: re-applies</span></td></tr>
       <tr class="fragment ov" data-fragment-index="2"><td><span class="dv-badge">OVERRULED</span></td><td>a higher-priority Config wins</td><td><span class="dv-act">reports only</span></td></tr>
       <tr class="fragment un" data-fragment-index="3"><td><span class="dv-badge">UNHANDLED</span></td><td>brownfield config, no Config owns it</td><td><span class="dv-act">reports only</span></td></tr>
     </tbody>
   </table>
   <aside class="notes">
-    Trim the YAML to the five lines that matter; the Deviation is owned by its parent Config.
+    Title ties back to the Config slide ("what if it drifts"): drift = running config no longer matches intent; SDC records it as a Deviation with a reason.
+    Point at metadata.name device01-baseconfig: one Deviation per device per intent — same pairing as a rolled-out Config (device + intent in the name). Brownfield on device01 is a separate target-type Deviation. API prefix config-/target- if someone asks (deviation_helper.go).
     Concrete example for each reason:
     - NOT_APPLIED: someone changed svc-a bandwidth on the device to 100.
     - OVERRULED: eth0 ipv4 from new-interface vs overlap-config (previous slide).
     - UNHANDLED: a loopback someone configured by hand.
     What SDC does (verified in docs):
-    - NOT_APPLIED + revertive: SDC re-applies the Config automatically and the deviation goes away. This is the abstract's "self-healing".
-    - NOT_APPLIED + non-revertive: the deviation is treated as part of the active config; clear it manually with kubectl sdc (deviation --revert).
+    - NOT_APPLIED: always reported (same column as OVERRULED/UNHANDLED). Non-revertive: SDC does not re-push; accept drift with kubectl sdc deviation --revert, or change the Config.
+    - NOT_APPLIED + revertive: exception on the slide sub-line — SDC re-applies the Config and the deviation goes away ("self-healing").
     - OVERRULED: reported only; SDC never changes the overriding config.
     - UNHANDLED: reported only; with no Config CR all brownfield config is one UNHANDLED deviation per target.
     SDC creates one Deviation per Target and one per Config CR.
@@ -1285,7 +1289,8 @@ spec:
 
 <!-- ============================================================ 7. BLAME -->
 <section data-sec="Blame" data-who="Markus">
-  <h2>Where did this value come from?</h2>
+  <h2>Where does this value come from?</h2>
+  <div class="fragment" data-fragment-index="1">
   <p class="small" style="margin:0 0 .1em"><b>running</b> + <b>intended</b> + <b>deviation</b> in one tree, each value tagged with its <b>owner</b></p>
   <p class="tiny" style="margin:0 0 .4em"><i>Config Blame is to Config apply what Git Blame is to commit.</i></p>
 <pre class="blame" style="font-size:.68em; margin:0"><code data-trim data-noescape>$ kubectl sdc blame --target demo-device
@@ -1303,6 +1308,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
                  -----  │         └── 🔑 name=svc-c
                running  │             └── 🍃 bandwidth -> 500</code></pre>
   <p class="tiny" style="margin:.4em 0 0; color:#334155">Left: <b>owner</b> (<code>namespace.config</code> or <code>running</code> = brownfield) &nbsp;·&nbsp; <span class="hl"><code>-> 100</code></span> actual &nbsp;·&nbsp; <span class="hl"><code>[~> 5000]</code></span> expected &nbsp;·&nbsp; <span class="hl"><code>(*)</code></span> deviation</p>
+  </div>
   <aside class="notes">
     What blame IS: a single view that combines the RUNNING config (what is on the device), the INTENDED config (what the Configs want) and the DEVIATIONS (where they differ), as a tree, and tags each leaf with the source of the highest-precedence value (a Config, 'default', or 'running' if no Config owns it). So it answers three questions at once: what is on the device, who put it there, and does it match the intent. That is why a deviated leaf shows 'actual [~> expected]' and a (*) next to its owner. It also shows the other half of the priority story: the OVERRULED leaf (eth0 ipv4) is attributed to the winning Config.
     The output is a TREE (the config is a tree, blame shows it as one) with the owner in a left column, same layout as the kubectl-sdc README (default format 'tree'; --format xpath gives one line per leaf). The tree below is illustrative and modelled on the README: replace it with real output and RE-CHECK the exact markers (icons, '(*)', '[~> expected]').
@@ -1317,7 +1323,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
 </section>
 
 <!-- ============================================================ RESOURCES (capstone) -->
-<section data-sec="Resources" data-who="Markus">
+<section data-sec="Resources" data-who="Markus" data-visibility="hidden">
   <h2>What you write, what you get back</h2>
   <div class="rs-steps">
     <div class="rs-step fragment" data-fragment-index="1">
@@ -1381,13 +1387,13 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
 </section>
 
 <!-- ============================================================ ECOSYSTEM -->
-<section data-sec="Ecosystem" data-who="Markus">
+<section data-sec="Ecosystem" data-who="Markus" data-visibility="hidden">
   <h2>The SDC ecosystem</h2>
   <div class="eco-row">
     <div class="eco-card c-hub fragment" data-fragment-index="1">
       <h3>SDC</h3>
       <p>Runs <b>in the cluster</b>: discovery, intent merge, validation, southbound drivers, sync.</p>
-      <span class="eco-repo">github.com/sdcio/sdc</span>
+      <span class="eco-repo">github.com/sdcio</span>
     </div>
     <div class="eco-card c-cli fragment" data-fragment-index="2">
       <h3><code>kubectl sdc</code></h3>
@@ -1403,8 +1409,8 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
   </div>
   <p class="eco-foot small fragment" data-fragment-index="4">Install: release binaries or <code>install.sh</code> on each repo &nbsp;·&nbsp; docs: <b>docs.sdcio.dev</b></p>
   <aside class="notes">
-    Three repos under github.com/sdcio — all open source (Nokia-initiated, CNCF Sandbox). This slide names the split; do not re-teach Config or deviations.
-    SDC (github.com/sdcio/sdc): the platform you have been describing — inventory CRDs, config-server, data-server, controllers. That is what runs when you helm/kustomize install SDC.
+    Multiple repos under github.com/sdcio — all open source (Nokia-initiated, CNCF Sandbox). This slide names three roles, not one monorepo; do not re-teach Config or deviations.
+    SDC (cluster platform): spread across repos such as config-server, data-server, schema-server, controllers — browse github.com/sdcio or docs.sdcio.dev for install (helm/kustomize).
     kubectl-sdc (github.com/sdcio/kubectl-sdc): binary kubectl-sdc, command kubectl sdc (not sdcio). Same kubeconfig/namespace/RBAC. Big picture for the room: SDC exposes resources through the Kubernetes API; kubectl get/yaml is enough for CR manifests, but operators live in subresources and plugin commands — synced running config (several output formats), blame tree, deviation list and manual revert when auto-heal does not apply. README lists blame, runningconfig, deviation, apply. Pick one example if someone asks; demo uses blame + deviation.
     sdc-lite (github.com/sdcio/sdc-lite): local/CI YANG toolkit — validate, diff, convert, pipeline; no cluster. Complements SDC, does not replace the plugin.
     One-liner split: cluster + devices = SDC; day-2 on that API = kubectl sdc; laptop/CI = sdc-lite.
@@ -1542,7 +1548,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
       <p style="font-size:1.3em; margin:0 0 .3em"><b>docs.sdcio.dev</b></p>
       <ul class="small">
         <li>Quick start &amp; lab</li>
-        <li>GitHub: <code>sdcio/sdc</code>, <code>kubectl-sdc</code>, <code>sdc-lite</code></li>
+        <li>GitHub: <a href="https://github.com/sdcio">github.com/sdcio</a> (<code>kubectl-sdc</code>, <code>sdc-lite</code>, …)</li>
         <li>Discord for news and questions</li>
         <li>Community meetup, Mondays 08:30 CET</li>
       </ul>
