@@ -433,12 +433,28 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   .good { color: var(--green); font-weight: 700; }
   .bad  { color: var(--red); font-weight: 700; }
   .hl   { background: #fff3b0; padding: 0 .2em; border-radius: 4px; }
-  .ha, .hb, .hc, .hd, .he { padding: 0 .15em; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
-  .reveal pre.blame .hl { padding: 0; }  /* keep monospace columns aligned */
+  .ha, .hb, .hc, .hd, .he, .hf { padding: 0 .15em; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  .reveal .blame-out {
+    width: 100%; margin: 0; padding: .55em .9em; background: #f6f8fa; border-radius: 8px;
+    font-family: var(--font-mono); font-size: .62em; line-height: 1.26; letter-spacing: 0;
+  }
+  .reveal .blame-out .blame-cmd { margin: 0 0 .25em; }
+  .reveal .blame-out table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 1em; border: none !important; }
+  /* Not a data table — override deck table rules (row lines under each tr, esp. last row). */
+  .reveal .blame-out table tr,
+  .reveal .blame-out table th,
+  .reveal .blame-out table td { padding: 0 !important; border: none !important; vertical-align: top; }
+  .reveal .blame-out table tbody tr:last-child th,
+  .reveal .blame-out table tbody tr:last-child td { border-bottom: none !important; }
+  .reveal .blame-out .blame-src {
+    width: 27ch; max-width: 27ch; text-align: right; padding-right: .6ch; white-space: nowrap;
+  }
+  .reveal .blame-out .blame-tree { white-space: pre; }
+  .reveal .blame-out .hl { padding: 0; }
   /* code highlights that switch on together with their description (fragment) */
   .reveal .hl-fr.fragment.custom { opacity: 1; visibility: visible; }
   .reveal .hl-fr.fragment.custom:not(.visible) { background: transparent; }
-  .ha { background: #ffe9a8; } .hb { background: #cdeedb; } .hc { background: #d6e4ff; } .hd { background: #f9d6e6; } .he { background: #ddd6fe; }
+  .ha { background: #fed7aa; } .hb { background: #bbf7d0; } .hc { background: #bfdbfe; } .hd { background: #fbcfe8; } .he { background: #c4b5fd; } .hf { background: #99f6e4; }
   .hl-static { background: #e8eef5; padding: 0 .15em; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
   /* two worlds + bridge */
   .worlds { display:flex; align-items:center; justify-content:center; gap:0; margin-top:.8em; }
@@ -463,7 +479,7 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
   .reveal table { font-size: .7em; margin: 0 auto; }
   /* plain header: theme default (no background, no colours) */
   /* The theme removes the line under the LAST row; keep it, so the table never seems to end early. */
-  .reveal table tbody tr:last-child td { border-bottom: 1px solid; }  /* same style as the other rows (text colour) */
+  .reveal table:not(.blame-tree-tbl) tbody tr:last-child td { border-bottom: 1px solid; }  /* same style as the other rows (text colour) */
   /* Step-by-step table rows: tables keep the original theme look (thin line under each row).
      Not-yet-shown rows stay as faint "ghost" rows (only a light line, text invisible), so the
      final size is predictable but the slide stays calm. Stronger/weaker ghost: border-bottom-color below. */
@@ -1331,33 +1347,32 @@ $ ssh -s upf netconf       # the config
   <h2>Configuration as intent</h2>
   <div class="cols">
     <div style="flex:1.2">
-<pre style="font-size:.66em"><code data-trim data-noescape><span class="hl-static">kind: Config</span>
+<pre style="font-size:.66em"><code data-trim data-noescape><span class="hc hl-fr fragment custom" data-fragment-index="1">kind: Config</span>
 metadata:
-  name: new-interface
+  <span class="hf hl-fr fragment custom" data-fragment-index="2">name: demo-new-interface</span>
   labels:
-    <span class="ha hl-fr fragment custom" data-fragment-index="1">config.sdcio.dev/targetName: demo</span>
+    <span class="ha hl-fr fragment custom" data-fragment-index="3">config.sdcio.dev/targetName: demo</span>
 spec:
-  <span class="hb hl-fr fragment custom" data-fragment-index="2">priority: 90</span>
-  <span class="hc hl-fr fragment custom" data-fragment-index="3">lifecycle:</span>
-    <span class="hc hl-fr fragment custom" data-fragment-index="3">deletionPolicy: delete</span>
-  <span class="he hl-fr fragment custom" data-fragment-index="4">revertive: true</span>
-  <span class="hd hl-fr fragment custom" data-fragment-index="5">config:</span>
-  <span class="hd hl-fr fragment custom" data-fragment-index="5">- path: /</span>
-    <span class="hd hl-fr fragment custom" data-fragment-index="5">value:</span>
-      <span class="hd hl-fr fragment custom" data-fragment-index="5">network:</span>
-      <span class="hd hl-fr fragment custom" data-fragment-index="5">interface:</span>
-      <span class="hd hl-fr fragment custom" data-fragment-index="5">- name: eth1</span>
-        <span class="hd hl-fr fragment custom" data-fragment-index="5">type: loopback</span>
-        <span class="hd hl-fr fragment custom" data-fragment-index="5">ipv4-enabled: true</span>
-        <span class="hd hl-fr fragment custom" data-fragment-index="5">ipv4-address: [10.10.10.10]</span></code></pre>
+  <span class="hb hl-fr fragment custom" data-fragment-index="4">priority: 90</span>
+  <span class="he hl-fr fragment custom" data-fragment-index="5">revertive: true</span>
+  <span class="hd hl-fr fragment custom" data-fragment-index="6">config:</span>
+  <span class="hd hl-fr fragment custom" data-fragment-index="6">- path: /</span>
+    <span class="hd hl-fr fragment custom" data-fragment-index="6">value:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="6">network:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="6">interface:</span>
+      <span class="hd hl-fr fragment custom" data-fragment-index="6">- name: eth1</span>
+        <span class="hd hl-fr fragment custom" data-fragment-index="6">type: loopback</span>
+        <span class="hd hl-fr fragment custom" data-fragment-index="6">ipv4-enabled: true</span>
+        <span class="hd hl-fr fragment custom" data-fragment-index="6">ipv4-address: [10.10.10.10]</span></code></pre>
     </div>
     <div style="flex:.9">
       <ul class="small" style="list-style:none; padding:0; margin:0">
-        <li class="fragment" data-fragment-index="1"><span class="ha">&nbsp;which device&nbsp;</span><br><span class="tiny">label pointing at the Target</span></li>
-        <li class="fragment" data-fragment-index="2" style="margin-top:.4em"><span class="hb">&nbsp;who wins&nbsp;</span><br><span class="tiny">if two Configs set the same leaf</span></li>
-        <li class="fragment" data-fragment-index="3" style="margin-top:.4em"><span class="hc">&nbsp;what if deleted&nbsp;</span><br><span class="tiny"><code>delete</code>: remove from device<br><code>orphan</code>: leave it</span></li>
-        <li class="fragment" data-fragment-index="4" style="margin-top:.4em"><span class="he">&nbsp;what if it drifts&nbsp;</span><br><span class="tiny"><code>revertive</code>: re-apply intent</span></li>
-        <li class="fragment" data-fragment-index="5" style="margin-top:.4em"><span class="hd">&nbsp;what to set&nbsp;</span><br><span class="tiny">only your part of the YANG tree</span></li>
+        <li class="fragment" data-fragment-index="1"><span class="hc">&nbsp;what resource&nbsp;</span><br><span class="tiny">the <code>Config</code> CR kind</span></li>
+        <li class="fragment" data-fragment-index="2" style="margin-top:.4em"><span class="hf">&nbsp;which intent&nbsp;</span><br><span class="tiny">this object’s <code>metadata.name</code></span></li>
+        <li class="fragment" data-fragment-index="3" style="margin-top:.4em"><span class="ha">&nbsp;which device&nbsp;</span><br><span class="tiny">label pointing at the Target</span></li>
+        <li class="fragment" data-fragment-index="4" style="margin-top:.4em"><span class="hb">&nbsp;who wins&nbsp;</span><br><span class="tiny">if two Configs set the same leaf</span></li>
+        <li class="fragment" data-fragment-index="5" style="margin-top:.4em"><span class="he">&nbsp;what if it drifts&nbsp;</span><br><span class="tiny"><code>revertive</code>: re-apply intent</span></li>
+        <li class="fragment" data-fragment-index="6" style="margin-top:.4em"><span class="hd">&nbsp;what to set&nbsp;</span><br><span class="tiny">only your part of the YANG tree</span></li>
       </ul>
     </div>
   </div>
@@ -1516,7 +1531,7 @@ spec:
     Build order: 1. the platform team's baseline (prio 100) sets eth0 ipv4-address 192.0.2.10 and speed 10G (ethernet in the demo YANG model device-networking). 2. Ops put a temporary override with prio 50: it sets the SAME leaf ipv4-address (20.20.20.20, wins because 50 beats 100) and a NEW leaf admin-up (true). 3. Merged result: ipv4-address from the override, speed from the baseline, admin-up from the override: different leaves never compete, they are simply merged. 4. Delete the override: ipv4-address falls back to 192.0.2.10 and admin-up falls back to default false: the lower-priority intent was never lost.
     The best demo of why this matters is the last bullet: the lower-priority intent is still stored, so removing the override restores it automatically. (With deletionPolicy delete, removing overlap-config also removes its values from the device; the baseline value then takes over.)
     Paths are xpath notation, the same as 'runningconfig --format xpath', the deviation slide and the blame tree (root container network in the demo model urn:demo:device-networking). A Config sets LEAVES: the full path to the leaf is what identifies it, and two Configs conflict only when they set the SAME leaf (here ipv4-address on eth0). Setting different leaves, even under the same list entry, just merges. Off-slide: baseline also sets type ethernet and ipv4-enabled so YANG must rules pass.
-    Same Configs as in the blame slide (initial-config, new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
+    Same Configs as in the blame slide (initial-config, demo-new-interface, overlap-config) so the audience recognises them. Role names and priorities are made up for the story: adapt to what the Swisscom case really looks like (e.g. vendor baseline vs. site-specific vs. temporary change).
     Briefly: ConfigSet exists for 'same snippet on many targets'; not needed here.
   </aside>
 </section>
@@ -1708,7 +1723,7 @@ spec:
     Point at metadata.name demo-initial-config: one Deviation per Config CR (target demo + intent initial-config). Brownfield on the same target is a separate Target-level Deviation. API prefix config-/target- if someone asks (deviation_helper.go).
     Concrete example for each reason:
     - NOT_APPLIED: someone changed svc-b bandwidth on the device to 100 (intent from initial-config still wants 5000).
-    - OVERRULED: eth0 ipv4 from new-interface vs overlap-config (previous slide).
+    - OVERRULED: eth0 ipv4 from demo-new-interface vs overlap-config (previous slide).
     - UNHANDLED: brownfield service svc-c (bandwidth 500) or a loopback someone configured by hand.
     What SDC does (verified in docs):
     - NOT_APPLIED: always reported (same column as OVERRULED/UNHANDLED). Non-revertive: SDC does not re-push; accept drift with kubectl sdc deviation --revert, or change the Config.
@@ -1724,24 +1739,30 @@ spec:
   <h2>Where does this value come from?</h2>
   <div class="fragment" data-fragment-index="1">
   <p class="small" style="margin:0 0 .1em"><b>running</b> + <b>intended</b> + <b>deviation</b> in one tree, each value tagged with its <b>owner</b></p>
-  <p class="tiny" style="margin:0 0 .4em"><i>Config Blame is to Config apply what Git Blame is to commit.</i></p>
-<pre class="blame" style="font-size:.68em; margin:0"><code data-trim data-noescape>$ kubectl sdc blame --target demo
-                 -----  │ 🎯 demo.demo
-                 -----  │ └── 📦 network
-                 -----  │     ├── 📦 interface
-                 -----  │     │   ├── 🔑 name=eth0
-   demo.initial-config  │     │   │   ├── 🍃 speed -> 10G
-   demo.overlap-config  │     │   │   ├── 🍃 admin-up -> true
-   demo.overlap-config  │     │   │   └── 🍃 ipv4-address -> 20.20.20.20
-                 -----  │     │   └── 🔑 name=eth1
-    demo.new-interface  │     │       ├── 🍃 ipv4-enabled -> true
-    demo.new-interface  │     │       └── 🍃 ipv4-address -> 10.10.10.10
-                 -----  │     └── 📦 service
-                 -----  │         ├── 🔑 name=svc-b
-demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃 bandwidth <span class="hl">-> 100 [~> 5000]</span>
-                 -----  │         └── 🔑 name=svc-c
-               running  │             └── 🍃 bandwidth -> 500</code></pre>
-  <p class="tiny" style="margin:.4em 0 0; color:#334155">Left: <b>owner</b> (<code>namespace.config</code> or <code>running</code> = brownfield) &nbsp;·&nbsp; <span class="hl"><code>-> 100</code></span> actual &nbsp;·&nbsp; <span class="hl"><code>[~> 5000]</code></span> expected &nbsp;·&nbsp; <span class="hl"><code>(*)</code></span> deviation</p>
+  <p class="tiny" style="margin:0 0 .28em"><i>Config Blame is to Config apply what Git Blame is to commit.</i></p>
+<div class="blame-out">
+  <div class="blame-cmd">$ kubectl sdc blame --target demo</div>
+  <table class="blame-tree-tbl" aria-label="blame tree">
+    <tbody>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│ 🎯 demo.demo</td></tr>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│ └── 📦 network</td></tr>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│     ├── 📦 interface</td></tr>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│     │   ├── 🔑 name=eth0</td></tr>
+      <tr><td class="blame-src">demo.initial-config</td><td class="blame-tree">│     │   │   ├── 🍃 speed -&gt; 10G</td></tr>
+      <tr><td class="blame-src">demo.overlap-config</td><td class="blame-tree">│     │   │   ├── 🍃 admin-up -&gt; true</td></tr>
+      <tr><td class="blame-src">demo.overlap-config</td><td class="blame-tree">│     │   │   └── 🍃 ipv4-address -&gt; 20.20.20.20</td></tr>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│     │   └── 🔑 name=eth1</td></tr>
+      <tr><td class="blame-src">demo.demo-new-interface</td><td class="blame-tree">│     │       ├── 🍃 ipv4-enabled -&gt; true</td></tr>
+      <tr><td class="blame-src">demo.demo-new-interface</td><td class="blame-tree">│     │       └── 🍃 ipv4-address -&gt; 10.10.10.10</td></tr>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│     └── 📦 service</td></tr>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│         ├── 🔑 name=svc-b</td></tr>
+      <tr><td class="blame-src">demo.initial-config<span class="hl">(*)</span></td><td class="blame-tree">│         │   └── 🍃 bandwidth <span class="hl">-&gt; 100 [~&gt; 5000]</span></td></tr>
+      <tr><td class="blame-src">-----</td><td class="blame-tree">│         └── 🔑 name=svc-c</td></tr>
+      <tr><td class="blame-src">running</td><td class="blame-tree">│             └── 🍃 bandwidth -&gt; 500</td></tr>
+    </tbody>
+  </table>
+</div>
+  <p class="tiny" style="margin:.28em 0 0; color:#334155">Left: <b>owner</b> (<code>namespace.config</code> or <code>running</code> = brownfield) &nbsp;·&nbsp; <span class="hl"><code>-> 100</code></span> actual &nbsp;·&nbsp; <span class="hl"><code>[~> 5000]</code></span> expected &nbsp;·&nbsp; <span class="hl"><code>(*)</code></span> deviation</p>
   </div>
   <aside class="notes">
     What blame IS: a single view that combines the RUNNING config (what is on the device), the INTENDED config (what the Configs want) and the DEVIATIONS (where they differ), as a tree, and tags each leaf with the source of the highest-precedence value (a Config, 'default', or 'running' if no Config owns it). So it answers three questions at once: what is on the device, who put it there, and does it match the intent. That is why a deviated leaf shows 'actual [~> expected]' and a (*) next to its owner. It also shows the other half of the priority story: the OVERRULED leaf (eth0 ipv4) is attributed to the winning Config.
@@ -1804,7 +1825,7 @@ demo.initial-config<span class="hl">(*)</span>  │         │   └── 🍃
     - TargetConnectionProfile: protocol (gNMI/NETCONF), port, encoding, NETCONF version, commit candidate, insecure/skipVerify.
     - TargetSyncProfile: how SDC keeps its view of the device current: syncs with protocol, paths, mode (gNMI get/once/sample/on-change; NETCONF polls), interval. Feeds RunningConfig and deviation detection.
     - Credentials: a Kubernetes Secret.
-    - Config: intent for ONE target (labels config.sdcio.dev/targetName and targetNamespace). path/value snippets, priority, lifecycle.deletionPolicy, revertive.
+    - Config: intent for ONE target (labels config.sdcio.dev/targetName and targetNamespace). path/value snippets, priority, revertive.
     - ConfigSet: template with a targetSelector; creates/updates one Config per matching target and deletes the ones that no longer match. Ideal for fleet-wide settings and the 14-NF Swisscom case.
 
     SDC DERIVES (created or computed by SDC, read-only for you):
