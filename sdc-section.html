@@ -622,7 +622,7 @@ $ psql -c "CREATE DATABASE orders"</code></pre>
         <li class="fragment">The deployment is declarative, but creating the database is a manual day-1 step</li>
         <li class="fragment">Operators can perform the imperative steps: the database becomes a custom resource</li>
       </ul>
-      <span class="cfg-tag warn fragment">&#9888; possible, operator is helpful</span>
+      <span class="cfg-tag warn fragment">&#9888; partially, operator makes it declarative</span>
     </div>
     <div class="cfg-diagram">
       <svg class="cfg-svg" viewBox="0 0 460 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Database: same stack plus an imperative CREATE DATABASE call into the service">
@@ -654,7 +654,7 @@ $ psql -c "CREATE DATABASE orders"</code></pre>
 $ ssh -s upf netconf       # the config
 &lt;edit-config&gt;...&lt;/edit-config&gt;</code></pre>
       <ul class="cfg-points bad-list">
-        <li class="fragment">Helm deploys the pod, the running config sits behind NETCONF and YANG</li>
+        <li class="fragment">Helm deploys the pod, the running config is set through NETCONF and YANG</li>
         <li class="fragment">Imperative RPCs, needed per instance</li>
         <li class="fragment">No desired state, no reconcile loop, no familiar cloud-native tooling</li>
       </ul>
@@ -690,8 +690,8 @@ $ ssh -s upf netconf       # the config
       <ul class="cfg-points bad-list">
         <li class="fragment"><b>One-shot:</b> the pipeline pushes once and moves on</li>
         <li class="fragment"><b>Slow iterations:</b> every change goes through the pipeline</li>
-        <li class="fragment"><b>No monitoring:</b> nobody watches the result</li>
-        <li class="fragment">Decide between multiple sources for auditability and traceability, or one large source for a holistic view</li>
+        <li class="fragment"><b>No monitoring:</b> changes are not continuously observed</li>
+        <li class="fragment"><b>Traceability:</b> decide between multiple sources for auditability and traceability, or one large source for a holistic view</li>
       </ul>
     </div>
     <div class="cfg-diagram">
@@ -1592,7 +1592,7 @@ spec:
     <li class="fragment"><b>Less toil</b>: describe intent, not commands</li>
     <li class="fragment"><b>Reliability</b>: drift detected and corrected</li>
     <li class="fragment"><b>Visibility</b>: running state, deviations, source</li>
-    <li class="fragment"><b>Scale</b>: composition by priority and ConfigSets, not copy/paste</li>
+    <li class="fragment"><b>Scale</b>: composition by priority and overlapping sets, not copy/paste</li>
   </ul>
   <aside class="notes">
     TODO before the talk: replace each bullet with a measured Swisscom result (rollout time, drift caught, onboarding time). Without numbers, tie each claim to something the audience just saw in the demo.
