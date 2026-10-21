@@ -823,6 +823,22 @@ section.has-dark-background, section.has-dark-background h1, section.has-dark-ba
     bottom: 14px !important; right: 24px !important; left: auto !important;
   }
   .reveal .progress { height: 4px; color: var(--blue); }
+
+  /* PDF export: Reveal zeroes slide padding; keep deck-chrome in normal flow so titles sit below it */
+  html.reveal-print .deck-chrome {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    background: #fff;
+    margin-bottom: 24px !important;
+  }
+  html.reveal-print .reveal .slides > section:not(.stack) {
+    padding-top: 0 !important;
+  }
+  html.reveal-print .reveal .slides > section.title-slide {
+    padding-top: 48px !important;
+  }
 </style>
 </head>
 
